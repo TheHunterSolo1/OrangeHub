@@ -1363,7 +1363,7 @@ end
 
 if Toggles.Halt.Value then
 
-local Dread = LocalPlayer:FindFirstChild("Shade",true) or LocalPlayer:FindFirstChild("_Shade",true)
+local Dread = ReplicatedStorage:FindFirstChild("Shade",true) or ReplicatedStorage:FindFirstChild("_Shade",true)
 
 if Dread then
 Dread.Name = "_Shade"
@@ -2069,7 +2069,7 @@ Default = false
 PlayerBox:AddDivider()
 
 PlayerBox:AddToggle('Godmode',{
-Text = "Position Spoof",
+Text = "Godmode",
 Default = false,
 Tooltip = "Can Lagback you or not work",
 Risky  = true,
@@ -2111,7 +2111,7 @@ end
 	-- You can define custom Modes but I have never had a use for it.
 	Mode ="Toggle" , -- Modes: Always, Toggle, Hold, Press (example down below)
 
-	Text = "Position Spoof", -- Text to display in the keybind menu
+	Text = "Godmode", -- Text to display in the keybind menu
 	NoUI = false, -- Set to true if you want to hide from the Keybind menu,
 
 	-- Occurs when the keybind is clicked, Value is `true`/`false`
@@ -3066,13 +3066,13 @@ Text = "Anti Halt",
 Default = false,
 Callback = function(Value)
 if Value then
-local Dread = LocalPlayer:FindFirstChild("Shade",true) or LocalPlayer:FindFirstChild("_Shade",true)
+local Dread = ReplicatedStorage:FindFirstChild("Shade",true) or ReplicatedStorage:FindFirstChild("_Shade",true)
 
 if Dread then
 Dread.Name = "_Shade"
 end
 else
-local Dread = LocalPlayer:FindFirstChild("Shade",true) or LocalPlayer:FindFirstChild("_Shade",true)
+local Dread = ReplicatedStorage:FindFirstChild("Shade",true) or ReplicatedStorage:FindFirstChild("_Shade",true)
 
 if Dread then
 Dread.Name = "Shade"
@@ -3159,8 +3159,8 @@ BypassBox:AddToggle('BypassSpeed',{
 Text = "Speed Bypass",
 Default = false,
 Callback  = function(Value)
- Options.MovementSpeed:SetMax(Value and 45 or 21)
-Options.FlightSpeed:SetMax(Value and 45 or 21)
+ Options.MovementSpeed:SetMax(Value and 75 or 21)
+Options.FlightSpeed:SetMax(Value and 75 or 21)
 end
 })
 BypassBox:AddDivider()
@@ -3199,7 +3199,7 @@ Default = false
 
 
 task.spawn(function()
-    while task.wait(0.23) do
+    while task.wait(0.208)  do
         if Library.Unloaded then break end
         if LocalPlayer:GetAttribute("Alive") and CollisionClone then
             if not Toggles.BypassSpeed.Value then
@@ -3216,7 +3216,7 @@ task.spawn(function()
                     if LocalPlayer:GetAttribute("Alive") then
                         CollisionClone.Massless = true
                     end
-                    task.wait(0.23)
+                    task.wait(0.208)
                     if LocalPlayer:GetAttribute("Alive") then
                         CollisionClone.Massless = false
                     end
@@ -3387,7 +3387,7 @@ end
 
 if Toggles.HidingPlace.Value then
 for _, v in pairs(Closets) do
-if v:IsDescendantOf(workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") - 1]) or v:IsDescendantOf(workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1]) then
+if v:IslOf(workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") - 1]) or v:IsDescendantOf(workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1]) then
 ESPLibrary:RemoveESP(v)
 end
 local Nam =  HidingPlaces[v.Name]
@@ -4000,12 +4000,12 @@ if Toggles.Godmode.Value then
             Toggles.FigureHearing:SetValue(true)
         end
 
-        if LocalPlayer.Character.LowerTorso.Root.C1 ~= CFrame.new(0, -2.2, 0) then
-            LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(0, -2.2, 0)
+        if LocalPlayer.Character.LowerTorso.Root.C1 ~= CFrame.new(0, -2.3, 0) then
+            LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(0, -2.3, 0)
         end
 
-        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.3 then
-            LocalPlayer.Character.Humanoid.HipHeight = 0.3
+        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.2 then
+            LocalPlayer.Character.Humanoid.HipHeight = 0.2
         end
 
         if LocalPlayer.Character.Collision.Size ~= Vector3.new(1, 1, 3) then
@@ -4319,305 +4319,7 @@ end))
 
 
 
-table.insert(Connections,workspace.DescendantAdded:Connect(function(v)
 
-
-
-repeat task.wait(0.1) until v.Parent
-if v.Parent then
-if v.Parent:FindFirstChildOfClass("Humanoid") then return end
-if  HidingPlaces[v.Name] then
-table.insert(Closets, v)
-end
-
-
-if Toggles.Ladder.Value then
-
-if v.Name == "Ladder" then
-AddESP(v, "Ladder",LadderColor)
-end
-
-end
-if Toggles.Fuse.Value then
-
-if v.Name == "FuseObtain" then
-AddESP(v, "Fuse",FuseColor)
-end
-
-
-end
-
-
-if Toggles.DeleteSeekFE.Value then
-
-if v.Name == "TriggerEventCollision" then
-
-Notify("Deleting Seek",3)
-
-for _, i  in pairs(v:GetChildren()) do
-if i.Name == "Collision" then
-i:Destroy()
-end
-end
-
-task.wait(0.5)
-for _, d in pairs(v:GetChildren()) do
-if d.Name ~= "Collision" then
-Notify("Deleted Seek Successfully",3)
-elseif d.Name == "Collision" then
-Notify("Failed To Delete Seek",3)
-end
-end
-
-
-end
-end
-
-
-if Toggles.SeekObf.Value then
-
-
-if v.Name == "Seek_Arm" or v.Name == "ChandelierObstruction" then
-for _, i in pairs(v:GetChildren()) do
-if i:IsA("BasePart") then
-i.CanTouch = false
-end
-end
-
-end
-end
-if Toggles.Breakers.Value then
-if v.Name == "LiveBreakerPolePickup" then
-AddESP(v, "Breaker",BreakerColor)
-
-end
-
-end
-
-if Toggles.ShowPath.Value then
-
-if v.Name == "SeekGuidingLight" then
-ShowSeekPath(v)
-end
-
-end
-
-
-if Toggles.DeleteFigureFE.Value then
-
-if v.Name == "FigureRig" or v.Name == "FigureRagdoll" then
-table.insert(Figures,v)
-end
-end
-
-if Toggles.AutoMinecart.Value then
-
-if v.Name == "DuckBoard" then
-
-table.insert(DuckBoards,v)
-end
-
-
-if  string.match(v.Name, "MinecartNode") then
-
-table.insert(Nodes,v)
-end
-
-end
-
-
-
-
-if Toggles.Gold.Value then
-
-
-if v.Name == "GoldPile" then
-
-AddESP(v, "Gold " .. v:GetAttribute("GoldValue"), GoldColor)
-
-end
-
-end
-if Toggles.AutoBreaker.Value then 
-if v.Name == "ElevatorBreaker" then
-Breaker(v)
-end
-end
-if Toggles.PromptReach.Value then
-
-if v:IsA("ProximityPrompt") then
-v:SetAttribute("Range", v.MaxActivationDistance)
-v.MaxActivationDistance = v.MaxActivationDistance * 2
-end
-
-end
-if Toggles.Books.Value then
-
-if v.Name == "LiveHintBook" then
-AddESP(v, "Library Book",BookColor)
-
-end
-
-end
-
-
-if Toggles.Snare.Value then
-
-if  v.Name == "Snare" then
-local wait = 0
-repeat task.wait(0.01) wait = wait  + 0.01 until wait > 1 or v:FindFirstChild("Hitbox")
-if v:FindFirstChild("Hitbox") then
-v.Hitbox.CanTouch = false
-end
-end
-end
-if Toggles.Objective.Value then
-local Bro = Items[v.Name]
-if Bro then
-AddESP(v, Bro, ItemsColor)
-
-end
-if v.Name == "MinesAnchor" then
-AddESP(v, "Anchor " .. v:WaitForChild("Sign").TextLabel.Text, ItemsColor)
-end
-
-end
-
-if Toggles.AntiLava.Value then
-if v.Name == "Lava" then
-v.CanTouch = false
-end
-end
-
-if Toggles.AntiWall.Value then
-if v.Name == "ScaryWall" then
-for _, i in pairs(v:GetChildren()) do
-if i:IsA("BasePart") then
-i.CanTouch = false
-end
-
-end
-end
-
-
-end
-if Toggles.RealBridge.Value then
-if v.Name == "Bridge" then
-if v.CanCollide == false then
-v.Transparency = Value and 0 or not Value and 1
-end
-
-end
-end
-if Toggles.Entity.Value  then 
-if  v.Name == "Snare" and v:FindFirstChild("Hitbox") then
-AddEntityESP(v, "Snare", EntityColor)
-
-end
-
-end
-
-if Toggles.Entity.Value  then 
-if v.Name == "DoorFake"  and v.Parent.Name == "SideroomDupe" then
-
-AddEntityESP(v.Door, "Dupe", EntityColor)
-end
-if v.Name == "GrumbleRig" then
-AddEntityESP(v, "Grumble", EntityColor)
-end
-if v.Name == "Groundskeeper" then
-AddEntityESP(v, "Ground Keeper", EntityColor)
-end
-if v.Name == "MandrakeLive" then
-AddEntityESP(v, "Man Drake", EntityColor)
-end
-if v.Name == "LiveEntityBramble" then
-AddEntityESP(v, "Bramble", EntityColor)
-end
-if   v.Name == "GiggleCeiling" then
-
-local wait = 0
-repeat task.wait(0.01) wait = wait  + 0.01 until wait > 2 or v:FindFirstChild("Hitbox")
-if v:FindFirstChild("Hitbox") then
-
-AddEntityESP(v, "Giggle", EntityColor)
-end
-end
-
-end
-if Toggles.Entity.Value then
-if (v.Name == "FigureRig" or v.Name == "FigureRagdoll") then  
- 
-AddEntityESP(v, "Figure", EntityColor)
-end
-end
-
-
-if Toggles.Dupe.Value then
-if v.Name == "DoorFake"  and v.Parent.Name == "SideroomDupe" then
-
-v:WaitForChild("Hidden",9e9).CanTouch = false
-end
-
-end
-
-if Toggles.FixBrokenBridge.Value then
-
-if v.Name == "Bridge" then
-FixBridge(v)
-end
-
-end
-
-if Toggles.AutoAnchorSolver.Value then
-if v.Name == "MinesAnchor" then
-table.insert(Anchors,v)
-end
-
-end
-
-
-if Toggles.GloomEggDamage.Value then
-
-if v.Name == "GloomEgg" then
-repeat task.wait() until v:FindFirstChildWhichIsA("BasePart")
-for _, i in pairs(v:GetChildren()) do
-if i:IsA("BasePart")  then
-
-i.CanTouch = false
-end
-end
-end
-end
-
-
-
- if v:IsA("ProximityPrompt") then
-if not (PromptIgnore[v.Name] or  v.Parent.Name == "Padlock" or  v.Parent:GetAttribute("JeffShop"))  or v.Parent.Parent.Name == "RetroWardrobe" then
-table.insert(Interactions, v)
-end
-
-end
-if Toggles.Giggle.Value then
-
-if   v.Name == "GiggleCeiling" then
-
-repeat task.wait() until v:FindFirstChild("Hitbox") 
-v.Hitbox.CanTouch = false
-end
-end
-
-if v:IsA("ProximityPrompt") then
-
-if Toggles.InstaInteract.Value then
-v:SetAttribute("Duration",v.HoldDuration)
-v.HoldDuration = 0
-end
-end
-
-
-end
-end))
 
 
 
@@ -4647,7 +4349,7 @@ if LocalPlayer:GetAttribute("Alive") then
 if Toggles.AutoRooms.Value then
     if Toggles.IgnoreA60.Value and not Toggles.Godmode.Value then
         Toggles.Godmode:SetValue(true)
-        Notify("Position Spoof Enabled Automatically For Ignore A-60", 5)
+        Notify("Godmode Enabled Automatically For Ignore A-60", 5)
     end
 
     LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 3)
@@ -4687,6 +4389,273 @@ end
 end
 
 end))
+
+
+
+
+local AllowedObjects = {
+	["Wardrobe"] = true,
+	["Rooms_Locker"] = true,
+	["Rooms_Locker_Fridge"] = true,
+	["Locker_Large"] = true,
+	["Backdoor_Wardrobe"] = true,
+	["Bed"] = true,
+	["Double_Bed"] = true,
+	["Toolshed"] = true,
+	["RetroWardrobe"] = true,
+	["CircularVent"] = true,
+	["Ladder"] = true,
+	["FuseObtain"] = true,
+	["TriggerEventCollision"] = true,
+	["Seek_Arm"] = true,
+	["ChandelierObstruction"] = true,
+	["LiveBreakerPolePickup"] = true,
+	["SeekGuidingLight"] = true,
+	["FigureRig"] = true,
+	["FigureRagdoll"] = true,
+	["DuckBoard"] = true,
+	["GoldPile"] = true,
+	["ElevatorBreaker"] = true,
+	["LiveHintBook"] = true,
+	["Snare"] = true,
+	["MinesAnchor"] = true,
+	["Lava"] = true,
+	["ScaryWall"] = true,
+	["Bridge"] = true,
+	["DoorFake"] = true,
+	["GrumbleRig"] = true,
+	["Groundskeeper"] = true,
+	["MandrakeLive"] = true,
+	["LiveEntityBramble"] = true,
+	["GiggleCeiling"] = true,
+	["GloomEgg"] = true
+}
+
+table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
+	
+	if AllowedObjects[v.Name] or v:IsA("ProximityPrompt") or string.match(v.Name, "MinecartNode") then
+local timeout = 0
+repeat task.wait(0.05) timeout = timeout + 0.05 until v.Parent or timeout > 1 
+		if v.Parent:FindFirstChildOfClass("Humanoid") then
+			return
+		end
+
+		local name = v.Name
+		local isPrompt = v:IsA("ProximityPrompt")
+
+		if HidingPlaces[name] then
+			table.insert(Closets, v)
+		end
+
+		if isPrompt then
+			if not (PromptIgnore[name] or v.Parent.Name == "Padlock" or v.Parent:GetAttribute("JeffShop") or v.Parent.Parent.Name == "RetroWardrobe") then
+				table.insert(Interactions, v)
+			end
+			if Toggles.InstaInteract.Value then
+				v:SetAttribute("Duration", v.HoldDuration)
+				v.HoldDuration = 0
+			end
+			if Toggles.PromptReach.Value then
+				v:SetAttribute("Range", v.MaxActivationDistance)
+				v.MaxActivationDistance = v.MaxActivationDistance * 2
+			end
+		end
+
+		if not isPrompt then
+			if Toggles.Ladder.Value then
+				if name == "Ladder" then
+					AddESP(v, "Ladder", LadderColor)
+				end
+			end
+
+			if Toggles.Fuse.Value then
+				if name == "FuseObtain" then
+					AddESP(v, "Fuse", FuseColor)
+				end
+			end
+
+			if Toggles.Gold.Value then
+				if name == "GoldPile" then
+					AddESP(v, "Gold " .. (v:GetAttribute("GoldValue") or ""), GoldColor)
+				end
+			end
+
+			if Toggles.Books.Value then
+				if name == "LiveHintBook" then
+					AddESP(v, "Library Book", BookColor)
+				end
+			end
+
+			if Toggles.Breakers.Value then
+				if name == "LiveBreakerPolePickup" then
+					AddESP(v, "Breaker", BreakerColor)
+				end
+			end
+
+			if Toggles.Entity.Value then
+				if name == "Snare" then
+					if v:FindFirstChild("Hitbox") then
+						AddEntityESP(v, "Snare", EntityColor)
+					end
+				end
+				if name == "GrumbleRig" then
+					AddEntityESP(v, "Grumble", EntityColor)
+				end
+				if name == "Groundskeeper" then
+					AddEntityESP(v, "Ground Keeper", EntityColor)
+				end
+				if name == "MandrakeLive" then
+					AddEntityESP(v, "Man Drake", EntityColor)
+				end
+				if name == "LiveEntityBramble" then
+					AddEntityESP(v, "Bramble", EntityColor)
+				end
+				if name == "FigureRig" or name == "FigureRagdoll" then
+					AddEntityESP(v, "Figure", EntityColor)
+				end
+				if name == "GiggleCeiling" then
+					local hb = v:WaitForChild("Hitbox", 2)
+					if hb then
+						AddEntityESP(v, "Giggle", EntityColor)
+					end
+				end
+				if name == "DoorFake" and v.Parent.Name == "SideroomDupe" then
+					AddEntityESP(v.Door, "Dupe", EntityColor)
+				end
+			end
+
+			if Toggles.Snare.Value then
+				if name == "Snare" then
+					local hb = v:WaitForChild("Hitbox", 1)
+					if hb then
+						hb.CanTouch = false
+					end
+				end
+			end
+
+			if Toggles.Giggle.Value then
+				if name == "GiggleCeiling" then
+					local hb = v:WaitForChild("Hitbox", 1)
+					if hb then
+						hb.CanTouch = false
+					end
+				end
+			end
+
+			if Toggles.AntiLava.Value then
+				if name == "Lava" then
+					v.CanTouch = false
+				end
+			end
+
+			if Toggles.AntiWall.Value then
+				if name == "ScaryWall" then
+					for _, iPart in pairs(v:GetChildren()) do
+						if iPart:IsA("BasePart") then
+							iPart.CanTouch = false
+						end
+					end
+				end
+			end
+
+			if Toggles.DeleteSeekFE.Value then
+				if name == "TriggerEventCollision" then
+					Notify("Deleting Seek", 3)
+					for _, iPart in pairs(v:GetChildren()) do
+						if iPart.Name == "Collision" then
+							iPart:Destroy()
+						end
+					end
+					task.spawn(function()
+						task.wait(0.5)
+						if v:FindFirstChild("Collision") then
+							Notify("Failed To Delete Seek", 3)
+						end
+						if not v:FindFirstChild("Collision") then
+							Notify("Deleted Seek Successfully", 3)
+						end
+					end)
+				end
+			end
+
+			if Toggles.SeekObf.Value then
+				if name == "Seek_Arm" or name == "ChandelierObstruction" then
+					for _, iPart in pairs(v:GetChildren()) do
+						if iPart:IsA("BasePart") then
+							iPart.CanTouch = false
+						end
+					end
+				end
+			end
+
+			if name == "MinesAnchor" then
+				if Toggles.Objective.Value then
+					local sign = v:WaitForChild("Sign", 2)
+					if sign then
+						AddESP(v, "Anchor " .. sign.TextLabel.Text, ItemsColor)
+					end
+				end
+				if Toggles.AutoAnchorSolver.Value then
+					table.insert(Anchors, v)
+				end
+			end
+
+			if Toggles.AutoMinecart.Value then
+				if name == "DuckBoard" then
+					table.insert(DuckBoards, v)
+				end
+				if string.match(name, "MinecartNode") then
+					table.insert(Nodes, v)
+				end
+			end
+
+			if Toggles.GloomEggDamage.Value then
+				if name == "GloomEgg" then
+					task.spawn(function()
+						repeat task.wait() until v:FindFirstChildWhichIsA("BasePart")
+						for _, iPart in pairs(v:GetChildren()) do
+							if iPart:IsA("BasePart") then
+								iPart.CanTouch = false
+							end
+						end
+					end)
+				end
+			end
+
+			if Toggles.ShowPath.Value then
+				if name == "SeekGuidingLight" then
+					ShowSeekPath(v)
+				end
+			end
+
+			if Toggles.AutoBreaker.Value then
+				if name == "ElevatorBreaker" then
+					Breaker(v)
+				end
+			end
+
+			if Toggles.FixBrokenBridge.Value then
+				if name == "Bridge" then
+					FixBridge(v)
+				end
+			end
+
+			if Toggles.Dupe.Value then
+				if name == "DoorFake" and v.Parent.Name == "SideroomDupe" then
+					local h = v:WaitForChild("Hidden", 2)
+					if h then
+						h.CanTouch = false
+					end
+				end
+			end
+		end
+	end
+end))
+
+
+
+		
+
 
 task.spawn(function()
 while task.wait(0.2) do
@@ -4843,7 +4812,7 @@ if Dread then
 Dread.Name = "Dread"
 end
 
-local Dread = LocalPlayer:FindFirstChild("Shade",true) or LocalPlayer:FindFirstChild("_Shade",true)
+local Dread = ReplicatedStorage:FindFirstChild("Shade",true) or ReplicatedStorage:FindFirstChild("_Shade",true)
 
 if Dread then
 Dread.Name = "Shade"
