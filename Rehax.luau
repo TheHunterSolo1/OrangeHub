@@ -1188,6 +1188,15 @@ BackdoorRush = 160,
 
 
 
+InfCrucfixTable = {
+RushMoving = 90,
+AmbushMoving = 160,
+A60 = 140,
+A120 = 99,
+GlitchRush = 150,
+GlitchAmbush = 110,
+}
+
 
  Items = {
 ["Bandage"] = "Bandage",
@@ -1376,6 +1385,12 @@ local MinesFloor = Tabs.Floor:AddRightGroupbox('Mines')
 local FoolsFloor = Tabs.Floor:AddRightGroupbox('Fools')
 local RoomsFloor = Tabs.Floor:AddLeftGroupbox('Rooms')
 local RetroFloor = Tabs.Floor:AddLeftGroupbox('Retro')
+
+
+
+
+
+
 
 
 
@@ -1672,6 +1687,21 @@ end
 end
 })
 
+
+MinesFloor:AddToggle('AntiSeekFlood',{
+Text = "Anti Seek Flood",
+Default = false,
+Disabled = Floor.Value ~= "Mines" and true or false,
+Callback = function(Value)
+for _, v in pairs(workspace.CurrentRooms:GetDescendants()) do
+if v.Name == "SeekFloodline" then
+v.CanCollide = Value
+end
+end
+end
+})
+
+
 RoomsFloor:AddToggle('AutoRooms',{
 Text = "Auto A-1000",
 Disabled = Floor.Value ~= "Rooms" and true or false,
@@ -1693,10 +1723,12 @@ end
 end
 })
 
+
 RoomsFloor:AddToggle('IgnoreA60',{
 Text = "Ignore A-60",
 Disabled = Floor.Value ~= "Rooms" and true or false,
 })
+
 
 
 
@@ -2174,7 +2206,8 @@ end
 ["Toolshed"] = "Closet",
 ["RetroWardrobe"] = "Closet",
 ["CircularVent"] = "Vent",
-
+["Bed"] = "Bed",
+["Double_Bed"] = "Double_Bed",
 }
  Closets = {}
 
@@ -2895,6 +2928,59 @@ Text = "No Camera Shake",
 Disabled = not require and true or false,
 })
 
+    local OldMinZoom = LocalPlayer.CameraMinZoomDistance
+    local OldMaxZoom  = LocalPlayer.CameraMaxZoomDistance
+
+CameraBox:AddToggle('Freecam',{
+Text = "Freecam",
+Default = false,
+Callback = function(Value)
+if not Value then
+
+local fcPart = workspace:FindFirstChild("FreecamPart")
+    
+    if fcPart then
+        
+        
+        
+        fcPart:Destroy()
+        
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then root.Anchored = false end
+        
+        LocalPlayer.CameraMinZoomDistance = LocalPlayer:GetAttribute("fc_om") or 0.5
+        LocalPlayer.CameraMaxZoomDistance = LocalPlayer:GetAttribute("fc_ox") or 128
+    end
+
+
+end
+end
+}):AddKeyPicker("FreecamKeybind", {
+	-- SyncToggleState only works with toggles.
+	-- It allows you to make a keybind which has its state synced with its parent toggle
+
+	-- Example: Keybind which you use to toggle flyhack, etc.
+	-- Changing the toggle disables the keybind state and toggling the keybind switches the toggle state
+
+	Default = "F", -- String as the name of the keybind (MB1, MB2 for mouse buttons)
+	SyncToggleState = true,
+
+	-- You can define custom Modes but I have never had a use for it.
+	Mode ="Toggle" , -- Modes: Always, Toggle, Hold, Press (example down below)
+
+	Text = "Freecam", -- Text to display in the keybind menu
+	NoUI = false, -- Set to true if you want to hide from the Keybind menu,
+
+	-- Occurs when the keybind is clicked, Value is `true`/`false`
+	Callback = function(Value)
+		
+	end,
+
+	-- Occurs when the keybind itself is changed, `NewKey` is a KeyCode Enum OR a UserInputType Enum, `NewModifiers` is a table with KeyCode Enum(s) or nil
+	ChangedCallback = function(NewKey, NewModifiers)
+	end,
+})
+
 
 
 CameraBox:AddToggle('NoScenes',{
@@ -3066,17 +3152,17 @@ Surge.Name = "SurgeRemote"
 BypassEntityBox:AddToggle('BypassSurgeDamage',{
 Text = "Anti Surge Damage",
 Default = false,
-Disabled = Floor.Value == "Outdoors" and false or true,
 Callback = function(Value)
 if Value then
-
+if RemotesFolder:FindFirstChild("SurgeRemote") then
 RemotesFolder.SurgeRemote.Parent = ReplicatedStorage 
 Surge.Parent = RemotesFolder
-
+end
 else
+if RemotesFolder:FindFirstChild("SurgeRemote") then
 ReplicatedStorage.SurgeRemote.Parent = RemotesFolder
 Surge.Parent = ReplicatedStorage 
-
+end
 end
 end
 })
@@ -3176,28 +3262,36 @@ Default = false
 
 
 
+
+
+local Params = RaycastParams.new()
+Params.FilterType = Enum.RaycastFilterType.Exclude
+local Direction = Vector3.new(0, -50, 0)
+
 task.spawn(function()
-    while task.wait(0.208)  do
+    while task.wait(0.208) do
         if Library.Unloaded then break end
-        if LocalPlayer:GetAttribute("Alive") and CollisionClone then
-            if not Toggles.BypassSpeed.Value then
+        if LocalPlayer:GetAttribute("Alive") and CollisionClone and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            Params.FilterDescendantsInstances = {LocalPlayer.Character, CollisionClone}
+            
+            if not workspace:Raycast(LocalPlayer.Character.HumanoidRootPart.Position, Direction, Params) then
                 CollisionClone.Massless = true
+            elseif not Toggles.BypassSpeed.Value then
+                CollisionClone.Massless = true
+            elseif LocalPlayer.Character:FindFirstChild("CollisionPart") and (LocalPlayer.Character.CollisionPart.Anchored or Toggles.AntiCheatMani.Value) then
+                CollisionClone.Massless = true
+                repeat task.wait() until not LocalPlayer.Character.CollisionPart.Anchored
+                
+                CollisionClone.Massless = true
+                task.wait(0.5)
+                CollisionClone.Massless = false
             else
-                if LocalPlayer.Character.CollisionPart.Anchored or Toggles.AntiCheatMani.Value then
+                if LocalPlayer:GetAttribute("Alive") then
                     CollisionClone.Massless = true
-                    repeat task.wait() until not LocalPlayer.Character.CollisionPart.Anchored
-                    
-                    CollisionClone.Massless = true
-                    task.wait(0.5)
+                end
+                task.wait(0.208)
+                if LocalPlayer:GetAttribute("Alive") then
                     CollisionClone.Massless = false
-                else
-                    if LocalPlayer:GetAttribute("Alive") then
-                        CollisionClone.Massless = true
-                    end
-                    task.wait(0.208)
-                    if LocalPlayer:GetAttribute("Alive") then
-                        CollisionClone.Massless = false
-                    end
                 end
             end
         end
@@ -3589,6 +3683,144 @@ end
 })
 
 
+BypassBox:AddDivider()
+BypassBox:AddLabel("Infinite Crucfix Only Works on A-60 A-120 Rush And Ambush and it have a chance to fail so take it at your own risk",true)
+BypassBox:AddToggle('InfCrucifix',{
+Text = "Infinite Crucifix ",
+Risky = true,
+Disabled = Floor.Value == "Rooms" and Floor.Value == "Outdoors" and true or false,
+})
+BypassBox:AddDivider()
+
+
+
+local Stored = {}
+
+local Names = {
+    Lock = true,
+    ChestBoxLocked = true,
+    Cellar = true,
+    Chest_Vine = true,
+    CuttableVines = true,
+    SkullLock = true,
+    Toolbox_Locked = true,
+    Lock1 = true,
+    Lock2 = true,
+}
+
+
+
+
+local function InfPrompt(Prompt)
+    local Char = LocalPlayer.Character
+    if not Char then return end
+    
+    local Tool = Char:FindFirstChild("Lockpick") or Char:FindFirstChild("SkeletonKey") or Char:FindFirstChild("Shears")
+    local Name = Tool and Tool.Name
+
+    if Tool then
+        if Prompt:GetAttribute("InfItems") and Prompt:GetAttribute("Tool") ~= Name then 
+if Prompt.Parent then
+            if Prompt.Parent:FindFirstChild("InfPrompt") then Prompt.Parent:FindFirstChild("InfPrompt"):Destroy() end
+            Prompt:SetAttribute("InfItems", nil)
+            Prompt.Enabled = true
+        end
+end
+
+        if not Prompt:GetAttribute("InfItems") then
+            Prompt.Enabled = false
+            Prompt:SetAttribute("InfItems", true)
+            Prompt:SetAttribute("Tool", Name)
+            
+            local Clone = Prompt:Clone()
+            Clone.Name = "InfPrompt"
+            Clone.MaxActivationDistance = Prompt.MaxActivationDistance * 0.5
+            Clone.Parent = Prompt.Parent
+            Clone.Enabled = true
+            
+            local Con
+            Con = Clone.Triggered:Connect(function()
+                Con:Disconnect()
+                Clone:Destroy()
+                
+                if Char:FindFirstChild(Name) then
+if Name == "Shears" then
+fireproximityprompt(Prompt)
+                    
+else
+                    RemotesFolder.DropItem:FireServer(Tool)
+end
+                    if Name == "Shears" then
+                        RemotesFolder.DropItem:FireServer(Tool)
+                    end
+                    
+                    local Drop = workspace.Drops:WaitForChild(Name, 1)
+                    if Drop then
+                        local DropPrompt = Drop:FindFirstChildWhichIsA("ProximityPrompt")
+                        if DropPrompt then 
+                            fireproximityprompt(DropPrompt) 
+                        end
+                    end
+                    
+                    if Name ~= "Shears" then
+                        fireproximityprompt(Prompt)
+                    end
+                end
+                
+                Prompt:SetAttribute("InfItems", nil)
+                Prompt:SetAttribute("Tool", nil)
+                Prompt.Enabled = true
+            end)
+        end
+    elseif Char:FindFirstChild("Key") and Prompt:GetAttribute("InfItems") then
+        if Prompt.Parent:FindFirstChild("InfPrompt") then Prompt.Parent:FindFirstChild("InfPrompt"):Destroy() end
+        Prompt:SetAttribute("InfItems", nil)
+        Prompt:SetAttribute("Tool", nil)
+        Prompt.Enabled = true
+    end
+end
+
+
+
+
+
+BypassBox:AddToggle('InfItems',{
+Text = "Infinite Items ",
+Disabled = Floor.Value == "Fools" and RemotesFolder.Name == "Bricks" and true or false,
+Callback = function(Value)
+if Value then
+for _, v in pairs(workspace.CurrentRooms:GetDescendants()) do
+if v:IsA("ProximityPrompt") then
+if Names[v.Parent.Name] or v.Name == "FusesPrompt" or v.Parent.Parent.Name == "Locker_Small_Locked" then
+table.insert(Stored, v)
+
+end
+end
+end
+else
+for _, Prompt in pairs(workspace.CurrentRooms:GetDescendants()) do
+if Prompt:IsA("ProximityPrompt") then
+if Names[Prompt.Parent.Name] then
+if Prompt:GetAttribute("InfItems") then
+            local Fake = Prompt.Parent:FindFirstChild("InfPrompt")
+            if Fake then 
+                Fake:Destroy() 
+            end
+            Prompt:SetAttribute("InfItems", nil)
+            Prompt.Enabled = true
+        end
+
+end
+end
+end
+
+table.clear(Stored)
+end
+
+end
+})
+
+
 table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
     if Toggles.ThirdPerson.Value then
         Camera.CFrame = Camera.CFrame * CFrame.new(Options.X.Value, Options.Y.Value, Options.Z.Value)
@@ -3613,26 +3845,34 @@ table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
 end))
 
 
+
+local PlayerModule = require(LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"))
+local Controls = PlayerModule:GetControls()
+
+
+
+
+
 local AutoInteract = 0
 local AutoLibrary = 0
 local ReduceLag = 0
 local DoorReach  = 0
 local AutoAnchorSolver  = 0
 local NotifyCode = 0
-local SeekPath = 0
-local UpdateCamera = 0
 
+local UpdateCamera = 0
+local InfItemsDelay = 0
 
 
 table.insert(Connections,RunService.RenderStepped:Connect(function(dt)
 ReduceLag = ReduceLag + dt
-SeekPath = SeekPath + dt
 AutoInteract = AutoInteract + dt
 UpdateCamera = UpdateCamera + dt
 NotifyCode = NotifyCode + dt
 DoorReach = DoorReach + dt
 AutoLibrary = AutoLibrary + dt
 AutoAnchorSolver = AutoAnchorSolver + dt
+InfItemsDelay = InfItemsDelay + dt
 if not LocalPlayer:GetAttribute("Alive") then 
 if CollisionClone then
 CollisionClone = nil
@@ -3671,6 +3911,72 @@ end
 
 
 
+if Toggles.Freecam.Value then
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChild("Humanoid")
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if root and not root.Anchored then root.Anchored = true end
+
+    if not workspace:FindFirstChild("FreecamPart") then
+        
+        
+        
+        
+        local part = Instance.new("Part")
+        part.Name = "FreecamPart"
+        part.Size = Vector3.new(0.01, 0.01, 0.01)
+        part.Transparency = 1
+        part.CanCollide = false
+        part.Anchored = true
+        part.CFrame = Camera.CFrame
+        part.Parent = workspace
+        
+        LocalPlayer:SetAttribute("fc_om", LocalPlayer.CameraMinZoomDistance)
+        LocalPlayer:SetAttribute("fc_ox", LocalPlayer.CameraMaxZoomDistance)
+        LocalPlayer.CameraMinZoomDistance = 0
+        LocalPlayer.CameraMaxZoomDistance = 0
+        
+        local rx, ry, rz = Camera.CFrame:ToOrientation()
+        LocalPlayer:SetAttribute("fc_p", math.deg(rx))
+        LocalPlayer:SetAttribute("fc_y", math.deg(ry))
+    end
+
+    local fcPart = workspace:FindFirstChild("FreecamPart")
+    local curCam = workspace.CurrentCamera
+    
+    if fcPart and curCam then
+        local delta = UserInputService:GetMouseDelta()
+        local sensitivity = UserInputService.KeyboardEnabled and 0.3 or 0.6
+        
+        local pitch = (LocalPlayer:GetAttribute("fc_p") or 0) - (delta.Y * sensitivity)
+        local yaw = (LocalPlayer:GetAttribute("fc_y") or 0) - (delta.X * sensitivity)
+        pitch = math.clamp(pitch, -80, 80)
+        
+        LocalPlayer:SetAttribute("fc_p", pitch)
+        LocalPlayer:SetAttribute("fc_y", yaw)
+        
+        fcPart.CFrame = CFrame.new(fcPart.Position) * CFrame.fromOrientation(math.rad(pitch), math.rad(yaw), 0)
+        curCam.CFrame = fcPart.CFrame
+        curCam.Focus = curCam.CFrame * CFrame.new(0, 0, -10)
+
+        if hum and hum.MoveDirection.Magnitude > 0 then
+            local speed = 30
+            local moveVec = hum.MoveDirection
+            local localMove = curCam.CFrame:VectorToObjectSpace(moveVec)
+            local finalMove = (curCam.CFrame.RightVector * localMove.X) + (curCam.CFrame.LookVector * -localMove.Z)
+            
+            fcPart.Position = fcPart.Position + (finalMove * speed * dt)
+        end
+    end
+end
+
+
+
+
+
+
+
+
 
 if Toggles.DeleteFigureFE.Value and Figures then
     for _, v in pairs(Figures) do
@@ -3697,7 +4003,9 @@ end
 
 
 
-if Toggles.AutoAnchorSolver.Value and AutoAnchorSolver > 1 then
+
+
+if Toggles.AutoAnchorSolver.Value and AutoAnchorSolver > 1 and LatestRoom.Value == 50 then
     AutoAnchorSolver = 0
     local HintFrame = LocalPlayer.PlayerGui.MainUI:FindFirstChild("AnchorHintFrame")
     
@@ -3719,19 +4027,30 @@ if Toggles.AutoAnchorSolver.Value and AutoAnchorSolver > 1 then
                     
                     for i = 1, #CodeText do
                         local Digit = tonumber(string.sub(CodeText, i, i)) or 0
-                        local Result = IsAddition and (Digit + Modifier) or (Digit - Modifier)
+                        local Result
+                        
+                        if IsAddition then
+                            Result = (Digit + Modifier) % 10
+                        else
+                            Result = (Digit - Modifier) % 10
+                            if Result < 0 then
+                                Result = Result + 10
+                            end
+                        end
                         
                         FinalCode = FinalCode .. tostring(Result)
                     end
                 end
 
-                v.AnchorRemote:InvokeServer(FinalCode)
+                v.AnchorRemote:InvokeServer(tonumber(FinalCode))
                 Notify("Anchor Code is " .. FinalCode, 1)
                 break
             end
         end
     end
 end
+
+
 
 
 
@@ -3796,85 +4115,70 @@ end
 
 
 
+
 if Toggles.AutoMinecart.Value and Camera:FindFirstChild("MinecartRig") then
-    if LatestRoom.Value < 49 then
-        if not LocalPlayer:GetAttribute("NotifyMinecart") then
-            Notify("[Auto Minecart] Please dont do anything while Auto Minecart Enabled", 5)
-            LocalPlayer:SetAttribute("NotifyMinecart", true)
-        end
-        
-        local RootPart = LocalPlayer.Character.HumanoidRootPart
-        local ClosestDuckDist = math.huge
-        
-        for _, v in pairs(DuckBoards) do
-            local Dist = (RootPart.Position - v:GetPivot().Position).Magnitude
-            if Dist < ClosestDuckDist then
-                ClosestDuckDist = Dist
-            end
-        end
-
-        if RequiredMainGame.crouching ~= (ClosestDuckDist < 30) then
-            RequiredMainGame.crouching = (ClosestDuckDist < 30) 
-        end
-
-        local CurrentNode = nil
-        local MinDist = math.huge
-
-        for _, Node in pairs(Nodes) do
-            if Node:GetAttribute("ForceConnect") == "Normal" then
-                local Dist = (RootPart.Position - Node.Position).Magnitude
-                if Dist < MinDist then
-                    MinDist = Dist
-                    CurrentNode = Node
-                end
-            end
-        end
-
-        if CurrentNode  then
-            local CurrentNum = tonumber(string.match(CurrentNode.Name, "%d+"))
-            
-            if CurrentNum then
-                local TargetName = "MinecartNode" .. tostring(CurrentNum + 2)
-                local TargetNode = nil
-
-                for _, Node in pairs(Nodes) do
-                    if Node.Name == TargetName then
-                        TargetNode = Node
-                        break
-                    end
-                end
-
-                if TargetNode then
-                    local DistToTarget = (TargetNode.Position - RootPart.Position).Magnitude
-                    
-                    if DistToTarget < 35 then
-                        local DirToNode = (TargetNode.Position - RootPart.Position).Unit
-                        local RightDot = RootPart.CFrame.RightVector:Dot(DirToNode)
-
-                        require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
-                            if RightDot > 0.08 then
-                                return Vector3.new(1, 0, 0)
-                            elseif RightDot < -0.08 then
-                                return Vector3.new(-1, 0, 0)
-                            end
-                            return Vector3.new(0, 0, -1)
-                        end
-                    elseif DistToTarget > 35 then
-                        require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
-                            return Vector3.new(0, 0, -1)
-                        end
-                    end
-                end
-            end
-        end
-    elseif LatestRoom.Value >= 50 then
-        if LocalPlayer:GetAttribute("NotifyMinecart") then
-            Notify("[Auto Minecart] you can control now", 5)
-            LocalPlayer:SetAttribute("NotifyMinecart", false)
-        end
-        Toggles.AutoMinecart:SetValue(false)
-        require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = Control
-    end
+if LatestRoom.Value < 49 then
+if not LocalPlayer:GetAttribute("NotifyMinecart") then
+Notify("[Auto Minecart] Please dont do anything while Auto Minecart Enabled", 5)
+LocalPlayer:SetAttribute("NotifyMinecart", true)
+end
+local RootPart = LocalPlayer.Character.HumanoidRootPart
+local ClosestDuckDist = math.huge
+for _, v in pairs(DuckBoards) do
+local Dist = (RootPart.Position - v:GetPivot().Position).Magnitude
+if Dist < ClosestDuckDist then
+ClosestDuckDist = Dist
+end
+end
+if RequiredMainGame.crouching ~= (ClosestDuckDist < 30) then
+RequiredMainGame.crouching = (ClosestDuckDist < 30)
+end
+local CurrentNode = nil
+local MinDist = math.huge
+for _, Node in pairs(Nodes) do
+if Node:GetAttribute("ForceConnect") == "Normal" then
+local Dist = (RootPart.Position - Node.Position).Magnitude
+if Dist < MinDist then
+MinDist = Dist
+CurrentNode = Node
+end
+end
+end
+if CurrentNode then
+local CurrentNum = tonumber(string.match(CurrentNode.Name, "%d+"))
+if CurrentNum then
+local Node1
+for _, Node in pairs(Nodes) do
+if Node.Name == "MinecartNode" .. tostring(CurrentNum + 1) then
+Node1 = Node
+break
+end
+end
+require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
+local MoveDir = Vector3.new(0, 0, -1)
+if Node1 then
+local Rel1 = RootPart.CFrame:PointToObjectSpace(Node1.Position)
+local Dist1 = Rel1.Magnitude
+if Dist1 < 25 then
+if Rel1.X > 0.01 then
+MoveDir = Vector3.new(1, 0, 0)
+elseif Rel1.X < -0.01 then
+MoveDir = Vector3.new(-1, 0, 0)
+end
+end
+end
+return MoveDir
+end
+end
+end
+elseif LatestRoom.Value >= 50 then
+if LocalPlayer:GetAttribute("NotifyMinecart") then
+Notify("[Auto Minecart] you can control now", 5)
+LocalPlayer:SetAttribute("NotifyMinecart", false)
+end
+Toggles.AutoMinecart:SetValue(false)
+require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = Control
+end
 end
 
 
@@ -3883,6 +4187,14 @@ end
 
 
 
+
+
+if Toggles.InfItems.Value and InfItemsDelay > 0.3 then
+InfItemsDelay = 0
+for _, Prompt in pairs(Stored) do
+InfPrompt(Prompt)
+end
+end
 
 
 
@@ -3978,7 +4290,7 @@ if Toggles.Godmode.Value then
             Notify("Enabled Figure Hearing Automaticlly cause Godmode needs it", 3)
             Toggles.FigureHearing:SetValue(true)
         end
-
+RemotesFolder.Crouch:FireServer(true)
         if LocalPlayer.Character.LowerTorso.Root.C1 ~= CFrame.new(0, -2.3, 0) then
             LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(0, -2.3, 0)
         end
@@ -4107,6 +4419,7 @@ if Toggles.AutoInteract.Value then
             if prompt.Parent.Parent and prompt.Parent.Parent.Parent and prompt.Parent.Parent.Parent.Name == "ItemSpawns" then
                 continue
             end
+ if prompt:GetAttribute("InfItems") and prompt.Name ~= "InfPrompt" then continue end
 
             if not prompt:GetAttribute("Interactions") or prompt:GetAttribute("Interactions") < 1 then
                 if prompt.Parent:IsA("BasePart") or prompt.Parent:IsA("Model") then
@@ -4320,9 +4633,12 @@ end
 end)
 
 
+local InfParams = RaycastParams.new()
+InfParams.FilterType = Enum.RaycastFilterType.Exclude
 
 table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
-    if LocalPlayer:GetAttribute("Alive") and Toggles.AutoRooms.Value then
+    if LocalPlayer:GetAttribute("Alive") then
+if Toggles.AutoRooms.Value then
         
         if Toggles.IgnoreA60.Value and not Toggles.Godmode.Value then
             Toggles.Godmode:SetValue(true)
@@ -4331,13 +4647,15 @@ table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
 
         LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 3)
 
-        local Entity = workspace:FindFirstChild("A60") or workspace:FindFirstChild("A120") or workspace:FindFirstChild("GlitchRush") or workspace:FindFirstChild("GlitchAmbush")
-        local EntityPresent = Entity and Entity.PrimaryPart and Entity.PrimaryPart.Position.Y > -6
+        local DangerousEntity = workspace:FindFirstChild("A120") or workspace:FindFirstChild("GlitchRush") or workspace:FindFirstChild("GlitchAmbush")
+        local A60 = workspace:FindFirstChild("A60")
         
         local ShouldHide = false
-        if EntityPresent then
-            local isA60 = (Entity.Name == "A60")
-            if not (isA60 and Toggles.IgnoreA60.Value) then
+
+        if DangerousEntity and DangerousEntity.PrimaryPart and DangerousEntity.PrimaryPart.Position.Y > -6 then
+            ShouldHide = true
+        elseif A60 and A60.PrimaryPart and A60.PrimaryPart.Position.Y > -6 then
+            if not Toggles.IgnoreA60.Value then
                 ShouldHide = true
             end
         end
@@ -4353,12 +4671,50 @@ table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
             end
         else
             LocalPlayer.Character:SetAttribute("Hiding", false)
-            local TargetDoor = workspace.CurrentRooms[LatestRoom.Value]:FindFirstChild("Door")
-            if TargetDoor and TargetDoor:FindFirstChild("Door") then
-                PathTo(TargetDoor.Door.Position)
+            local CurrentRoom = workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+            if CurrentRoom then
+                local TargetDoor = CurrentRoom:FindFirstChild("Door")
+                if TargetDoor and TargetDoor:FindFirstChild("Door") then
+                    PathTo(TargetDoor.Door.Position)
+                end
             end
         end
     end
+
+
+
+
+if Toggles.InfCrucifix.Value and not Toggles.Godmode.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    local Origin = LocalPlayer.Character.HumanoidRootPart.Position
+    
+    for _, Entity in pairs(workspace:GetChildren()) do
+        local Range = InfCrucfixTable[Entity.Name]
+        if Range and Entity.PrimaryPart then
+            local Target = Entity.PrimaryPart.Position
+            
+            if (Origin - Target).Magnitude < Range then
+                InfParams.FilterDescendantsInstances = {LocalPlayer.Character, Entity}
+                
+                if not workspace:Raycast(Origin, Target - Origin, InfParams) then
+                    local Tool = LocalPlayer.Character:FindFirstChild("Crucifix")
+                    if Tool then
+                        RemotesFolder.DropItem:FireServer(Tool)
+                        repeat task.wait()
+                            local Drop = workspace.Drops:FindFirstChild("Crucifix")
+                            if Drop and Drop:FindFirstChildOfClass("ProximityPrompt") then
+                                fireproximityprompt(Drop:FindFirstChildOfClass("ProximityPrompt"))
+                            end
+                        until LocalPlayer.Character:FindFirstChild("Crucifix")
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+
+end
 end))
 
 
@@ -4395,6 +4751,17 @@ end
 end
 
 
+if Toggles.InfItems.Value then
+
+if v:IsA("ProximityPrompt") then
+if Names[v.Parent.Name] or v.Name == "FusesPrompt" or v.Parent.Parent.Name == "Locker_Small_Locked" then
+table.insert(Stored, v)
+
+end
+end
+
+
+end
 
 if Toggles.DeleteSeekFE.Value then
     if v.Name == "TriggerEventCollision" then
@@ -4447,6 +4814,14 @@ if Toggles.Breakers.Value then
 if v.Name == "LiveBreakerPolePickup" then
 AddESP(v, "Breaker",BreakerColor)
 
+end
+
+end
+
+if Toggles.AntiSeekFlood.Value then
+
+if v.Name == "SeekFloodline" then
+v.CanCollide = true
 end
 
 end
@@ -4710,6 +5085,11 @@ end
 
 end
 
+for i, k in pairs(Stored) do
+if v == k then
+table.remove(Stored, i)
+end
+end
 
 end))
 
@@ -4849,6 +5229,24 @@ end
 
 
 
+local fcPart = workspace:FindFirstChild("FreecamPart")
+    
+    if fcPart then
+        
+        
+        
+        fcPart:Destroy()
+        
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then root.Anchored = false end
+        
+        LocalPlayer.CameraMinZoomDistance = LocalPlayer:GetAttribute("fc_om") or 0.5
+        LocalPlayer.CameraMaxZoomDistance = LocalPlayer:GetAttribute("fc_ox") or 128
+    end
+
+
+
+
 if ReplicatedStorage:FindFirstChild("A90") then 
 ReplicatedStorage:FindFirstChild("A90").Parent = RemotesFolder
 end
@@ -4934,6 +5332,28 @@ end
 for _, v in pairs(workspace:GetDescendants()) do
 if v:IsA("ProximityPrompt") then
 v.MaxActivationDistance = v:GetAttribute("Range") or v.MaxActivationDistance 
+end
+if v.Name == "SeekFloodline" then
+v.CanCollide = false
+end
+
+end
+
+for _, Prompt in pairs(workspace.CurrentRooms:GetDescendants()) do
+if Prompt:IsA("ProximityPrompt") then
+if Names[Prompt.Parent.Name] then
+if Prompt:GetAttribute("InfItems") then
+if Prompt.Parent then
+            local Fake = Prompt.Parent:FindFirstChild("InfPrompt")
+            if Fake then 
+                Fake:Destroy() 
+            end
+end
+            Prompt:SetAttribute("InfItems", nil)
+            Prompt.Enabled = true
+        end
+
+end
 end
 end
 
