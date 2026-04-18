@@ -2329,7 +2329,6 @@ Default = false,
 })
 AutoBox:AddToggle('AutoHeartbeat',{
 Text = "Auto Heartbeat Minigame",
-Disabled = hookmetamethod and false or true,
 Default = false
 })
 
@@ -4241,7 +4240,7 @@ if Toggles.MinecartTP.Value and Camera:FindFirstChild("MinecartRig") then
 if NoHook and LatestRoom.Value < 49 then
 RemotesFolder.MinecartPos:FireServer(workspace.CurrentRooms[LatestRoom.Value].Door.Door.Position)
 end
-
+end
 
 if Toggles.AutoMinecart.Value and Camera:FindFirstChild("MinecartRig") then
 if LatestRoom.Value < 49 then
