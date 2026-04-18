@@ -4723,6 +4723,7 @@ end))
 
 
 
+
 local NoHook = false
 local Success = pcall(function()
     local Old
@@ -4735,10 +4736,10 @@ local Success = pcall(function()
             end
 
             if Method == "FireServer" then
-                if Self == RemotesFolder.MinecartPos then
-                    if Toggles.MinecartTP.Value and Camera:FindFirstChild("MinecartRig") and LatestRoom.Value < 49 then
-                        local Target = workspace.CurrentRooms[LatestRoom.Value].Door.Door
-                        return Old(Self, Target.Position)
+                if Toggles.MinecartTP.Value and Self.Name == "MinecartPos" and Self.Parent == RemotesFolder and Camera:FindFirstChild("MinecartRig") and LatestRoom.Value < 49 then
+                    local Room = workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+                    if Room and Room:FindFirstChild("Door") and Room.Door:FindFirstChild("Door") then
+                        return Old(Self, Room.Door.Door.Position)
                     end
                 end
 
@@ -4746,13 +4747,13 @@ local Success = pcall(function()
                     local Char = LocalPlayer.Character
                     if Char and not Char:GetAttribute("Hiding") then
                         if Toggles.LookmanDamage.Value and workspace:FindFirstChild("BackdoorLookman") then
-                            return Old(Self, -650)
+                            return Old(Self, -600)
                         end
                         if Toggles.EyesDamage.Value and (workspace:FindFirstChild("Eyes") or workspace:FindFirstChild("Lookman")) then
                             if RemotesFolder.Name ~= "RemotesFolder" then
-                                return Old(Self, 0, -650, 0, false)
+                                return Old(Self, 0, -600, 0, false)
                             end
-                            return Old(Self, -650)
+                            return Old(Self, -600)
                         end
                     end
                 end
