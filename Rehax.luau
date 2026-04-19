@@ -6,6 +6,8 @@ local Lighting = game:GetService("Lighting")
 local UserInputService = game:GetService("UserInputService")
 local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage") 
+local ExecutorSupport = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/refs/heads/main/ExecutorTest"))()
+
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local TweenService = game:GetService("TweenService")
   repeat task.wait() until game:IsLoaded()
@@ -1142,7 +1144,7 @@ function PathTo(Pos)
     PathActive = true
     
     local path = PathfindingService:CreatePath({
-        AgentRadius = 2.2,
+        AgentRadius = 2,
         AgentHeight = 1,
         AgentCanJump = false,
         WaypointSpacing = 4
@@ -1202,6 +1204,12 @@ GlitchAmbush = 110,
 }
 
 
+
+local Firepp = ExecutorSupport.fireproximityprompt
+local Require = ExecutorSupport.require
+local ReplicateSignal = ExecutorSupport.replicatesignal
+local FireTouch = ExecutorSupport.firetouchinterest
+local HookMeta = ExecutorSupport.hookmetamethod
  Items = {
 ["Bandage"] = "Bandage",
 ["Flashlight"] = "Flash light",
@@ -1245,6 +1253,7 @@ GlitchAmbush = 110,
 ["WaterPump"] = "Water Pump",
 ["VineGuillotine"] = "Vine Lever",
 ["Shakelight"] = "Shake Light",
+["LibraryHintPaper"] = "Hint Paper",
 }
 
 
@@ -1313,7 +1322,7 @@ end
 
 
 
-if require then
+if Require then
 RequiredMainGame = require(MainGame)
 end
 
@@ -1333,7 +1342,7 @@ local Cutscene = RemoteListener:FindFirstChild("Cutscenes") or RemoteListener:Fi
 Cutscene.Name = "Cutscenes_"
 end
 
-if require then
+if Require then
 RequiredMainGame = require(MainGame)
 end
 
@@ -1495,17 +1504,26 @@ end
 })
 
 
+
+
 local Pressed = false
 GameBox:AddButton({
     Text = "Reset",
     DoubleClick = true,
     Func = function()
         Pressed = not Pressed
-        if not Pressed then return end
         
-        if replicatesignal then
+        if not Pressed then
+            if RemotesFolder:FindFirstChild("Underwater") then
+                RemotesFolder.Underwater:FireServer(false)
+            end
+            return
+        end
+        
+        if ReplicateSignal then
             replicatesignal(LocalPlayer.Kill)
         else
+            Notify("Double Click to stop", 5)
             task.spawn(function()
                 while Pressed and LocalPlayer:GetAttribute("Alive") ~= false do
                     if RemotesFolder:FindFirstChild("Underwater") then
@@ -1513,12 +1531,15 @@ GameBox:AddButton({
                     end
                     task.wait()
                 end
+                
+                if RemotesFolder:FindFirstChild("Underwater") then
+                    RemotesFolder.Underwater:FireServer(false)
+                end
                 Pressed = false
             end)
         end
     end
 })
-
 
 
 
@@ -1694,16 +1715,18 @@ end
 
 local DuckBoards = {}
 local Nodes = {}
-
-local Control = require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector
+local Control
+if Require then
+ Control = require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector
+end
 MinesFloor:AddToggle('AutoMinecart',{
 Text = "Auto Minecart",
 Default = false,
-Disabled = Floor.Value ~= "Mines" and true or false,
+Disabled = (Floor.Value == "Mines" and Require) and false or true,
 Callback = function(Value)
 if Value then
 
-if not require then
+if not Require then
 Notify("Wont work cause no require support",3)
 Toggles.AutoMinecart:SetValue(false)
 end
@@ -2337,57 +2360,49 @@ Default = false
 
 
 
-function Breaker(part)
+
+
+
+local function Breaker(part)
     local label = part:WaitForChild("SurfaceGui"):WaitForChild("Frame"):WaitForChild("Code")
     local frame = label.Parent
 
     local function run()
-        local mode = Method
-        if mode == "Exploit" then
-            if Toggles.AutoBreaker.Value then
-                RemotesFolder.EBF:FireServer()
-            end
-        elseif mode == "Legit" then
+        task.wait(0.05)
+        if not Toggles.AutoBreaker.Value then return end
+
+        if Method == "Exploit" then
+            RemotesFolder.EBF:FireServer()
+            return
+        end
+
+        if Method == "Legit" then
             local target = tonumber(label.Text)
-            local transparency = math.floor(frame.BackgroundTransparency + 0.5)
+            local trans = frame.BackgroundTransparency
             
-            for _, v in pairs(part:GetChildren()) do
-                if v.Name == "BreakerSwitch" and v:GetAttribute("ID") == target then
-                    local pc = v:FindFirstChild("PrismaticConstraint")
-                    local light = v:FindFirstChild("Light")
-                    local sound = v:FindFirstChild("Sound")
+            if target then
+                for _, v in part:GetChildren() do
+                    if v.Name == "BreakerSwitch" and v:GetAttribute("ID") == target then
+                        local pc = v:FindFirstChild("PrismaticConstraint")
+                        local light = v:FindFirstChild("Light")
+                        local sound = v:FindFirstChild("Sound")
 
-                    if transparency == 0 then
-                        v:SetAttribute("Enabled", true)
-                        
-                        if pc then 
-                            pc.TargetPosition = 0.2 
+                        if trans == 0 then
+                            v:SetAttribute("Enabled", true)
+                            if pc then pc.TargetPosition = -0.2 end
+                            if light then
+                                light.Material = Enum.Material.Neon
+                                local spark = light:FindFirstChild("Spark", true)
+                                if spark then spark:Emit(1) end
+                            end
+                            if sound then sound:Play() end
+                        elseif trans == 1 then
+                            v:SetAttribute("Enabled", false)
+                            if pc then pc.TargetPosition = 0.2 end
+                            if light then light.Material = Enum.Material.Glass end
+                            if sound then sound:Play() end
                         end
-                        
-                        if light then
-                            light.Material = Enum.Material.Neon
-                            local spark = light:FindFirstChild("Spark", true)
-                            if spark then spark:Emit(1) end
-                        end
-
-                        if sound then 
-                            sound:Play() 
-                        end
-
-                    elseif transparency == 1 then
-                        v:SetAttribute("Enabled", false)
-                        
-                        if pc then 
-                            pc.TargetPosition = -0.2 
-                        end
-                        
-                        if light then
-                            light.Material = Enum.Material.Glass
-                        end
-
-                        if sound then 
-                            sound:Play() 
-                        end
+                        break
                     end
                 end
             end
@@ -2395,7 +2410,6 @@ function Breaker(part)
     end
 
     label:GetPropertyChangedSignal("Text"):Connect(run)
-    frame:GetPropertyChangedSignal("BackgroundTransparency"):Connect(run)
     run()
 end
 
@@ -3267,6 +3281,9 @@ Callback  = function(Value)
 Options.FlightSpeed:SetMax(Value and 75 or 21)
 end
 })
+
+
+
 BypassBox:AddDivider()
 
 BypassBox:AddToggle('AntiCheatMani',{
@@ -3305,7 +3322,6 @@ Default = false
 
 
 
-
 local Params = RaycastParams.new()
 Params.FilterType = Enum.RaycastFilterType.Exclude
 local Direction = Vector3.new(0, -100, 0)
@@ -3317,6 +3333,12 @@ task.spawn(function()
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         
         if LocalPlayer:GetAttribute("Alive") and hrp and CollisionClone and CollisionClone.Parent then
+
+
+
+
+
+
             Params.FilterDescendantsInstances = {char, CollisionClone}
             
             if not workspace:Raycast(hrp.Position, Direction, Params) or not Toggles.BypassSpeed.Value then
@@ -3900,7 +3922,7 @@ local function InfPrompt(Prompt)
                 end
             end)
         end
-    elseif Char:FindFirstChild("Key") and Prompt:GetAttribute("InfItems") then
+    elseif (Char:FindFirstChild("Key") or Char:FindFirstChild("Fuse")) and Prompt:GetAttribute("InfItems") then
         if Prompt.Parent then
             local ExistingPrompt = Prompt.Parent:FindFirstChild("InfPrompt")
             if ExistingPrompt then 
@@ -4030,6 +4052,7 @@ Notify("Anticheat Bypassed this only works until you get a cutscene or Halt",5)
 end
 
 end
+
 
 
 
@@ -4165,7 +4188,7 @@ if Toggles.AutoAnchorSolver.Value and AutoAnchorSolver > 1 and LatestRoom.Value 
                     end
                 end
 
-                v.AnchorRemote:InvokeServer(tonumber(FinalCode))
+                v.AnchorRemote:InvokeServer(tostring(FinalCode))
                 Notify("Anchor Code is " .. FinalCode, 1)
                 break
             end
@@ -4237,7 +4260,7 @@ end
 
 
 if Toggles.MinecartTP.Value and Camera:FindFirstChild("MinecartRig") then
-if NoHook and LatestRoom.Value < 49 then
+if not HookMeta and LatestRoom.Value < 49 then
 RemotesFolder.MinecartPos:FireServer(workspace.CurrentRooms[LatestRoom.Value].Door.Door.Position)
 end
 end
@@ -4443,7 +4466,7 @@ end
 if Toggles.NoScenes.Value and LatestRoom.Value == 100 then
 Toggles.NoScenes:SetValue(false)
 end
-if NoHook then
+if not HookMeta then
 if Toggles.FigureHearing.Value then
     if RemotesFolder:FindFirstChild("Crouch") then
         
@@ -4505,10 +4528,13 @@ end
 
 end
 
-
 if Toggles.AntiCheatMani.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character:PivotTo(LocalPlayer.Character:GetPivot() * CFrame.new(0, 0, 10000))
-        end
+    local currentPivot = LocalPlayer.Character:GetPivot()
+    LocalPlayer.Character:PivotTo(currentPivot + (currentPivot.LookVector * -10000))
+end
+
+
+
   
 
 if Toggles.AutoInteract.Value then
@@ -4570,7 +4596,7 @@ end
 end
 
 
-if NoHook then
+
 if Toggles.EyesDamage.Value then
     if (workspace:FindFirstChild("Eyes") or workspace:FindFirstChild("Lookman")) and not LocalPlayer.Character:GetAttribute("Hiding") then
         if RemotesFolder.Name ~= "RemotesFolder" then
@@ -4585,7 +4611,6 @@ if Toggles.LookmanDamage.Value then
 if workspace:FindFirstChild("BackdoorLookman") then
 if not LocalPlayer.Character:GetAttribute("Hiding") then
 MotorReplication:FireServer(-650)
-end
 end
 end
 end
@@ -4665,34 +4690,31 @@ Toggles.AntiCheatMani:SetValue(false)
 
 end
 
-if Toggles.NoClip.Value then 
-for _, v in pairs(LocalPlayer.Character:GetChildren()) do
-if  v.Name == "CollisionClone" then continue end
-if v:IsA("BasePart") then
-if v.CanCollide then
-v.CanCollide  = false
-end
-end
+
+
+if Toggles.NoClip.Value then
+    for _, v in ipairs(LocalPlayer.Character:GetChildren()) do
+        if v:IsA("BasePart") and v.Name ~= "CollisionClone" and v.CanCollide then
+            v.CanCollide = false
+        end
+    end
+    if LocalPlayer.Character:FindFirstChild("Collision") then
+        LocalPlayer.Character.Collision.CanCollide = false
+        if LocalPlayer.Character.Collision:FindFirstChild("CollisionCrouch") then
+            LocalPlayer.Character.Collision.CollisionCrouch.CanCollide = false
+        end
+    end
 end
 
-local v =  LocalPlayer.Character:FindFirstChild("Collision")
-if v then
-if v:FindFirstChild("CollisionCrouch") then
-v.CollisionCrouch.CanCollide = v.CanCollide
-end
-
-end
-end
 if not Toggles.NoClip.Value then
-local v =  LocalPlayer.Character:FindFirstChild("Collision")
-if v then
-v.CanCollide = v.CollisionGroup == "PlayerCrouching" and false or v.CollisionGroup == "Player" and true or false
-if v:FindFirstChild("CollisionCrouch") then
-v.CollisionCrouch.CanCollide = v.CanCollide
-end
-end
-
-
+    if LocalPlayer.Character:FindFirstChild("Collision") then
+        if LocalPlayer.Character.Collision.CanCollide ~= (LocalPlayer.Character.Collision.CollisionGroup == "Player") then
+            LocalPlayer.Character.Collision.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "Player")
+            if LocalPlayer.Character.Collision:FindFirstChild("CollisionCrouch") then
+                LocalPlayer.Character.Collision.CollisionCrouch.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "Player")
+            end
+        end
+    end
 end
 
 
@@ -4702,7 +4724,7 @@ end
 
 if Toggles.FastClosetExit.Value then
 if LocalPlayer.Character:GetAttribute("Hiding") then
-if LocalPlayer.Character.Humanoid.MoveDirection.Magnitude > 1  then
+if LocalPlayer.Character.Humanoid.MoveDirection.Magnitude > 0.45 then
 CamLock:FireServer()
 
 end
@@ -4720,55 +4742,39 @@ end))
 
 
 
-
-
-
-
-local NoHook = false
-local Success = pcall(function()
-    local Old
-    Old = hookmetamethod(game, "__namecall", function(Self, ...)
-        local Method = getnamecallmethod()
-        
-        if Method == "FireServer" or Method == "InvokeServer" then
-            if Toggles.AutoHeartbeat.Value and Self == ClutchHeartbeat then
-                return true
-            end
-
-            if Method == "FireServer" then
-                if Toggles.MinecartTP.Value and Self.Name == "MinecartPos" and Self.Parent == RemotesFolder and Camera:FindFirstChild("MinecartRig") and LatestRoom.Value < 49 then
-                    local Room = workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
-                    if Room and Room:FindFirstChild("Door") and Room.Door:FindFirstChild("Door") then
-                        return Old(Self, Room.Door.Door.Position)
-                    end
+if HookMeta then
+    local Success = pcall(function()
+        local Old
+        Old = hookmetamethod(game, "__namecall", function(Self, ...)
+            local Method = getnamecallmethod()
+            
+            if Method == "FireServer" or Method == "InvokeServer" then
+                if Toggles.AutoHeartbeat.Value and (Self == ClutchHeartbeat or Self.Name == "ClutchHeartbeat") then
+                    return true
                 end
 
-                if Self == MotorReplication then
-                    local Char = LocalPlayer.Character
-                    if Char and not Char:GetAttribute("Hiding") then
-                        if Toggles.LookmanDamage.Value and workspace:FindFirstChild("BackdoorLookman") then
-                            return Old(Self, -600)
-                        end
-                        if Toggles.EyesDamage.Value and (workspace:FindFirstChild("Eyes") or workspace:FindFirstChild("Lookman")) then
-                            if RemotesFolder.Name ~= "RemotesFolder" then
-                                return Old(Self, 0, -600, 0, false)
-                            end
-                            return Old(Self, -600)
+                if Method == "FireServer" then
+                    if Toggles.MinecartTP.Value and Self.Name == "MinecartPos" and Self.Parent == RemotesFolder and Camera:FindFirstChild("MinecartRig") and LatestRoom.Value < 49 then
+                        local Room = workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+                        if Room and Room:FindFirstChild("Door") and Room.Door:FindFirstChild("Door") then
+                            return Old(Self, Room.Door.Door.Position)
                         end
                     end
-                end
 
-                if Toggles.FigureHearing.Value and Self.Name == "Crouch" then
-                    return Old(Self, true)
+                    if Toggles.FigureHearing.Value and Self.Name == "Crouch" then
+                        return Old(Self, true)
+                    end
                 end
             end
-        end
 
-        return Old(Self, ...)
+            return Old(Self, ...)
+        end)
     end)
-end)
+end
 
-if not Success then NoHook = true end
+
+
+
 
 
 
@@ -4922,7 +4928,7 @@ if Toggles.DeleteSeekFE.Value then
         for _, Item in pairs(v:GetChildren()) do
             if Item.Name == "Collision" then
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-if firetouchinterest then
+if FireTouch then
                     firetouchinterest(LocalPlayer.Character.HumanoidRootPart, Item, 0)
 end
                                   end
