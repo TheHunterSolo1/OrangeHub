@@ -1722,7 +1722,7 @@ end
 MinesFloor:AddToggle('AutoMinecart',{
 Text = "Auto Minecart",
 Default = false,
-Disabled =  Floor.Value == "Mines" and false or true,
+Disabled =  Floor.Value ~= "Mines" and true or false,
 Callback = function(Value)
 if Value then
 
