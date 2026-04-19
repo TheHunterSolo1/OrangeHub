@@ -1355,7 +1355,7 @@ end
 
 
 
-if Toggles.Godmode.Value then
+if Toggles.Godmode.Value and RemotesFolder.Name ~= "RemotesFolder" then
 LocalPlayer.Character.Collision.Position -= Vector3.new(0, 4, 0)
 end
 
@@ -1722,7 +1722,7 @@ end
 MinesFloor:AddToggle('AutoMinecart',{
 Text = "Auto Minecart",
 Default = false,
-Disabled = (Floor.Value == "Mines" and Require) and false or true,
+Disabled =  Floor.Value == "Mines" and false or true,
 Callback = function(Value)
 if Value then
 
@@ -1781,11 +1781,6 @@ end
 })
 
 
-MinesFloor:AddToggle('MinecartTP',{
-Text = "Minecart Teleport",
-Default = false,
-Disabled = Floor.Value ~= "Mines" and true or false,
-})
 
 
 RoomsFloor:AddToggle('AutoRooms',{
@@ -4259,11 +4254,7 @@ end
 
 
 
-if Toggles.MinecartTP.Value and Camera:FindFirstChild("MinecartRig") then
-if not HookMeta and LatestRoom.Value < 49 then
-RemotesFolder.MinecartPos:FireServer(workspace.CurrentRooms[LatestRoom.Value].Door.Door.Position)
-end
-end
+
 
 if Toggles.AutoMinecart.Value and Camera:FindFirstChild("MinecartRig") then
 if LatestRoom.Value < 49 then
@@ -4311,7 +4302,7 @@ local Dist1 = Rel1.Magnitude
 if Dist1 < 25 then
 if Rel1.X > 0.12 then
 MoveDir = Vector3.new(1, 0, 0)
-elseif Rel1.X < -0.012 then
+elseif Rel1.X < -0.12 then
 MoveDir = Vector3.new(-1, 0, 0)
 end
 end
@@ -4754,13 +4745,7 @@ if HookMeta then
                 end
 
                 if Method == "FireServer" then
-                    if Toggles.MinecartTP.Value and Self.Name == "MinecartPos" and Self.Parent == RemotesFolder and Camera:FindFirstChild("MinecartRig") and LatestRoom.Value < 49 then
-                        local Room = workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
-                        if Room and Room:FindFirstChild("Door") and Room.Door:FindFirstChild("Door") then
-                            return Old(Self, Room.Door.Door.Position)
-                        end
-                    end
-
+                    
                     if Toggles.FigureHearing.Value and Self.Name == "Crouch" then
                         return Old(Self, true)
                     end
@@ -4771,7 +4756,6 @@ if HookMeta then
         end)
     end)
 end
-
 
 
 
