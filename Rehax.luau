@@ -2360,7 +2360,7 @@ Default = false
 
 local function Breaker(part)
     local label = part:WaitForChild("SurfaceGui"):WaitForChild("Frame"):WaitForChild("Code")
-    local frame = label.Parent
+     
 
     local function run()
         task.wait(0.05)
@@ -2373,16 +2373,17 @@ local function Breaker(part)
 
         if Method == "Legit" then
             local target = tonumber(label.Text)
-            local trans = frame.BackgroundTransparency
             
             if target then
                 for _, v in part:GetChildren() do
                     if v.Name == "BreakerSwitch" and v:GetAttribute("ID") == target then
+                        local trans = part:WaitForChild("SurfaceGui"):WaitForChild("Frame"):WaitForChild("Code"):WaitForChild("Frame").BackgroundTransparency
                         local pc = v:FindFirstChild("PrismaticConstraint")
                         local light = v:FindFirstChild("Light")
                         local sound = v:FindFirstChild("Sound")
 
                         if trans == 0 then
+if v:GetAttribute("Enabled") then return end
                             v:SetAttribute("Enabled", true)
                             if pc then pc.TargetPosition = -0.2 end
                             if light then
@@ -2392,6 +2393,7 @@ local function Breaker(part)
                             end
                             if sound then sound:Play() end
                         elseif trans == 1 then
+if not v:GetAttribute("Enabled") then return end
                             v:SetAttribute("Enabled", false)
                             if pc then pc.TargetPosition = 0.2 end
                             if light then light.Material = Enum.Material.Glass end
@@ -4492,8 +4494,9 @@ end
 if Toggles.DoorReach.Value then
 
 local Door = workspace.CurrentRooms[LatestRoom.Value].Door
-
+if Door.Parent and Door.Parent.Name ~= "101" then
 Door.ClientOpen:FireServer()
+end
 end
  
 if Toggles.NoAcc.Value then
@@ -4698,6 +4701,15 @@ if Toggles.NoClip.Value then
 end
 
 if not Toggles.NoClip.Value then
+
+for _, v in pairs(LocalPlayer.Character:GetChildren()) do
+if not (v.Name == "CollisionClone" or v.Name == "Collision") then
+if v:IsA("BasePart") and not v.CanCollide then
+v.CanCollide  = true
+end
+end
+end
+
     if LocalPlayer.Character:FindFirstChild("Collision") then
         if LocalPlayer.Character.Collision.CanCollide ~= (LocalPlayer.Character.Collision.CollisionGroup == "Player") then
             LocalPlayer.Character.Collision.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "Player")
