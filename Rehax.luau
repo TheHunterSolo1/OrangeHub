@@ -3360,7 +3360,7 @@ Default = false
 	-- You can define custom Modes but I have never had a use for it.
 	Mode = Library.IsMobile and "Toggle" or "Hold",  -- Modes: Always, Toggle, Hold, Press (example down below)
 
-	Text = "Anticheat Manoulation", -- Text to display in the keybind menu
+	Text = "Anticheat Manipulation", -- Text to display in the keybind menu
 	NoUI = false, -- Set to true if you want to hide from the Keybind menu,
 
 	-- Occurs when the keybind is clicked, Value is `true`/`false`
