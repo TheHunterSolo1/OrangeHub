@@ -3344,10 +3344,10 @@ BypassBox:AddDivider()
 
 
 
-BypassBox:AddToggle('NoclipBypass',{
-Text = "Noclip Bypass",
+BypassBox:AddToggle('AntiCheatMani',{
+Text = "Anticheat Manipulation",
 Default = false
-}):AddKeyPicker("NoclipBypass", {
+}):AddKeyPicker("AntiCheatMan", {
 	-- SyncToggleState only works with toggles.
 	-- It allows you to make a keybind which has its state synced with its parent toggle
 
@@ -3358,9 +3358,9 @@ Default = false
 	SyncToggleState = true,
 
 	-- You can define custom Modes but I have never had a use for it.
-	Mode = "Toggle", -- Modes: Always, Toggle, Hold, Press (example down below)
+	Mode = Library.IsMobile and "Toggle" or "Hold",  -- Modes: Always, Toggle, Hold, Press (example down below)
 
-	Text = "Noclip Bypass", -- Text to display in the keybind menu
+	Text = "Anticheat Manoulation", -- Text to display in the keybind menu
 	NoUI = false, -- Set to true if you want to hide from the Keybind menu,
 
 	-- Occurs when the keybind is clicked, Value is `true`/`false`
@@ -3374,26 +3374,6 @@ Default = false
 })
 
 
-
-local Passed = false
-
-task.spawn(function()
-while task.wait() do
-if Library.Unloaded then break end
-if Toggles.NoclipBypass.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer:GetAttribute("Alive") then
-    Passed = false
-    if workspace:Raycast(LocalPlayer.Character.HumanoidRootPart.Position, LocalPlayer.Character.Humanoid.MoveDirection * 2, params) then
-Passed = true
-        local currentPivot = LocalPlayer.Character:GetPivot()
-        LocalPlayer.Character:PivotTo(currentPivot * CFrame.new(0, 0, 10000))
-        task.wait()
-        LocalPlayer.Character:PivotTo(currentPivot * CFrame.new(0, 0, -1))
-    end
-end
-
-
-end
-end)
 
 
 
@@ -4605,12 +4585,12 @@ end
 
 
 end
---[[
+
 if Toggles.AntiCheatMani.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
     local currentPivot = LocalPlayer.Character:GetPivot()
     LocalPlayer.Character:PivotTo(currentPivot + (currentPivot.LookVector * -10000))
 end
-]]
+
 
 
   
@@ -4759,7 +4739,7 @@ Toggles.AutoHiding:SetValue(false)
 
 end
 
---[[
+
 if Options.AntiCheatMan:GetState() and not Toggles.AntiCheatMani.Value then
 Toggles.AntiCheatMani:SetValue(true)
 
@@ -4772,7 +4752,7 @@ Toggles.AntiCheatMani:SetValue(false)
 end
 
 
-]]
+
 if Toggles.NoClip.Value then
     for _, v in ipairs(LocalPlayer.Character:GetChildren()) do
         if v:IsA("BasePart") and v.Name ~= "CollisionClone" and v.CanCollide then
@@ -4798,14 +4778,13 @@ end
 end
 
     if LocalPlayer.Character:FindFirstChild("Collision") then
-        if LocalPlayer.Character.Collision.CanCollide ~= (LocalPlayer.Character.Collision.CollisionGroup == "PlayerCrouching") then
-            LocalPlayer.Character.Collision.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "PlayerCrouching")
+        LocalPlayer.Character.Collision.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup ~= "PlayerCrouching")
+
             if LocalPlayer.Character.Collision:FindFirstChild("CollisionCrouch") then
-                LocalPlayer.Character.Collision.CollisionCrouch.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "PlayerCrouching") 
+                LocalPlayer.Character.Collision.CollisionCrouch.CanCollide = LocalPlayer.Character.Collision.CanCollide
             end
         end
     end
-end
 
 
 
