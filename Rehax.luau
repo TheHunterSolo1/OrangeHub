@@ -1210,6 +1210,7 @@ local Require = ExecutorSupport.require
 local ReplicateSignal = ExecutorSupport.replicatesignal
 local FireTouch = ExecutorSupport.firetouchinterest
 local HookMeta = ExecutorSupport.hookmetamethod
+
  Items = {
 ["Bandage"] = "Bandage",
 ["Flashlight"] = "Flash light",
@@ -1254,6 +1255,7 @@ local HookMeta = ExecutorSupport.hookmetamethod
 ["VineGuillotine"] = "Vine Lever",
 ["Shakelight"] = "Shake Light",
 ["LibraryHintPaper"] = "Hint Paper",
+["LotusPetalPickup"] = "Lotus Petal",
 }
 
 
@@ -1276,6 +1278,11 @@ local CamLock = RemotesFolder:WaitForChild("CamLock")
 local AnchorArgs
 local PL = RemotesFolder:WaitForChild("PL")
 local ClutchHeartbeat = RemotesFolder:WaitForChild("ClutchHeartbeat")
+
+
+local params = RaycastParams.new()
+    params.FilterDescendantsInstances = {LocalPlayer.Character}
+    
 
 
 
@@ -1337,6 +1344,10 @@ if LocalPlayer.Character then
 MainGame = LocalPlayer.PlayerGui.MainUI.Initiator:WaitForChild("Main_Game")
  RemoteListener = MainGame.RemoteListener
 
+ 
+    params.FilterDescendantsInstances = {LocalPlayer.Character}
+    
+
 if Toggles.NoScenes.Value then
 local Cutscene = RemoteListener:FindFirstChild("Cutscenes") or RemoteListener:FindFirstChild("Cutscenes_")
 Cutscene.Name = "Cutscenes_"
@@ -1349,7 +1360,16 @@ end
 end
 
 
+if Toggles.Jamming.Value then
 
+if  ReplicatedStorage:FindFirstChild("LiveModifiers") and ReplicatedStorage:FindFirstChild("LiveModifiers"):FindFirstChild("Jammin") then
+local Jam = LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Jam
+Jam.Playing = false 
+local Jamming = game:GetService("SoundService").Main.Jamming
+Jamming.Enabled =  false
+end
+
+end
 
 
 
@@ -1934,6 +1954,17 @@ PlayerBox:AddSlider("MovementSpeed", {
 	Tooltip = "Walking Speed", 
 })
 
+PlayerBox:AddToggle('EnableMovementSpeed',{
+Text = "Enable Movement Speed",
+Default = false,
+Callback = function(Value)
+if not Value then
+LocalPlayer.Character.Humanoid.WalkSpeed = 15
+
+end
+end
+})
+
 PlayerBox:AddSlider("ClimbingSpeed", {
 	Text = "Climbing Speed",
 	Default = 15,
@@ -1947,6 +1978,18 @@ PlayerBox:AddSlider("ClimbingSpeed", {
 
 	Tooltip = "Climbing Speed", 
 })
+
+PlayerBox:AddToggle('EnableClimbingSpeed',{
+Text = "Enable Climbing Speed",
+Default = false,
+Callback = function(Value)
+if not Value then
+LocalPlayer.Character.Humanoid.WalkSpeed = 15
+
+end
+end
+})
+
 PlayerBox:AddDivider()
 
 local OldAccel 
@@ -2472,28 +2515,26 @@ Default = false
 })
 
 
-local OldDensity
+
 local OldFogEnd
 LightingBox:AddToggle('NoFog',{
 Text = "No Fog",
 Default = false,
 Tooltip = "No fog",
 Callback = function(Value)
-if Value then
-if Lighting:FindFirstChildOfClass("Atmosphere").Density then
-OldDensity = Lighting:FindFirstChildOfClass("Atmosphere").Density
+if not Value then
+for _, v in pairs(Lighting:GetChildren()) do
+    if v:IsA("Atmosphere") then
+        v.Density = 0.94
+    end
 end
+end
+if Value then
 OldFogEnd = Lighting.FogEnd 
 else
 if OldFogEnd then
 Lighting.FogEnd = OldFogEnd
 OldFogEnd = nil
-end
-if OldDensity then
-if Lighting:FindFirstChildOfClass("Atmosphere").Density then
-Lighting:FindFirstChildOfClass("Atmosphere").Density  = OldDensity
-end
-OldDensity = nil
 end
 
 end
@@ -2630,7 +2671,7 @@ if Value then
 
 for _, v in pairs(Closets) do
 local Nam =  HidingPlaces[v.Name]
-if Nam then
+if Nam and v:IsDescendantOf(workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")]) then
 AddESP(v, Nam, HidingPlaceColor)
 end
 end
@@ -3013,7 +3054,7 @@ end
 	-- Example: Keybind which you use to toggle flyhack, etc.
 	-- Changing the toggle disables the keybind state and toggling the keybind switches the toggle state
 
-	Default = "F", -- String as the name of the keybind (MB1, MB2 for mouse buttons)
+	Default = "B", -- String as the name of the keybind (MB1, MB2 for mouse buttons)
 	SyncToggleState = true,
 
 	-- You can define custom Modes but I have never had a use for it.
@@ -3197,6 +3238,23 @@ end
 end
 })
 
+
+
+BypassEntityBox:AddToggle('Jamming',{
+Text = "Anti Jammimg",
+Default = false,
+Callback = function(Value)
+if  ReplicatedStorage:FindFirstChild("LiveModifiers") and ReplicatedStorage:FindFirstChild("LiveModifiers"):FindFirstChild("Jammin") then
+
+local Jam = LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Jam
+Jam.Playing = not Value 
+local Jamming = game:GetService("SoundService").Main.Jamming
+Jamming.Enabled =  not Value
+end
+end
+})
+
+
 local Surge = Instance.new("RemoteEvent",ReplicatedStorage)
 Surge.Name = "SurgeRemote"
 
@@ -3283,10 +3341,13 @@ end
 
 BypassBox:AddDivider()
 
-BypassBox:AddToggle('AntiCheatMani',{
-Text = "Anticheat Manipulation",
+
+
+
+BypassBox:AddToggle('NoclipBypass',{
+Text = "Noclip Bypass",
 Default = false
-}):AddKeyPicker("AntiCheatMan", {
+}):AddKeyPicker("NoclipBypass", {
 	-- SyncToggleState only works with toggles.
 	-- It allows you to make a keybind which has its state synced with its parent toggle
 
@@ -3297,9 +3358,9 @@ Default = false
 	SyncToggleState = true,
 
 	-- You can define custom Modes but I have never had a use for it.
-	Mode = Library.IsMobile and "Toggle"  or "Hold", -- Modes: Always, Toggle, Hold, Press (example down below)
+	Mode = "Toggle", -- Modes: Always, Toggle, Hold, Press (example down below)
 
-	Text = "Anticheat Manipulation", -- Text to display in the keybind menu
+	Text = "Noclip Bypass", -- Text to display in the keybind menu
 	NoUI = false, -- Set to true if you want to hide from the Keybind menu,
 
 	-- Occurs when the keybind is clicked, Value is `true`/`false`
@@ -3313,6 +3374,26 @@ Default = false
 })
 
 
+
+local Passed = false
+
+task.spawn(function()
+while task.wait() do
+if Library.Unloaded then break end
+if Toggles.NoclipBypass.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer:GetAttribute("Alive") then
+    Passed = false
+    if workspace:Raycast(LocalPlayer.Character.HumanoidRootPart.Position, LocalPlayer.Character.Humanoid.MoveDirection * 2, params) then
+Passed = true
+        local currentPivot = LocalPlayer.Character:GetPivot()
+        LocalPlayer.Character:PivotTo(currentPivot * CFrame.new(0, 0, 10000))
+        task.wait()
+        LocalPlayer.Character:PivotTo(currentPivot * CFrame.new(0, 0, -1))
+    end
+end
+
+
+end
+end)
 
 
 
@@ -3342,7 +3423,7 @@ task.spawn(function()
                 CollisionClone.Massless = true
             else
                 local cp = char:FindFirstChild("CollisionPart")
-                if cp and (cp.Anchored or Toggles.AntiCheatMani.Value) then
+                if cp and (cp.Anchored or Passed) then
                     CollisionClone.Massless = true
                     repeat task.wait() until not cp.Anchored or not cp.Parent
                     if CollisionClone and CollisionClone.Parent then
@@ -3751,7 +3832,9 @@ ESPBox:AddToggle('Player', {
                 if Value then
                     local hum = v.Character:FindFirstChildOfClass("Humanoid")
                     if hum and hum.Health > 0 then
-                        AddESP(v.Character, v.Name .. " [" .. math.floor(hum.Health) .. "/" .. math.floor(hum.MaxHealth) .. "]", PlayerColor)
+AddESP(v.Character, v.Name .. " [" .. math.floor((hum.Health / hum.MaxHealth) * 100) .. "%]", PlayerColor)
+
+                        
                     end
                 end
             end
@@ -3776,7 +3859,8 @@ task.spawn(function()
                     local hum = v.Character:FindFirstChildOfClass("Humanoid")
                     if hum then
                         if hum.Health > 0 then
-                            AddESP(v.Character, v.Name .. " [" .. math.floor(hum.Health) .. "/" .. math.floor(hum.MaxHealth) .. "]", PlayerColor)
+                            AddESP(v.Character, v.Name .. " [" .. math.floor((hum.Health / hum.MaxHealth) * 100) .. "%]", PlayerColor)
+
                         else
                             ESPLibrary:RemoveESP(v.Character)
                         end
@@ -4006,11 +4090,11 @@ end
 Camera = workspace.CurrentCamera
 
 
-if not LocalPlayer.Character:GetAttribute("Climbing") then
+if not LocalPlayer.Character:GetAttribute("Climbing") and Toggles.EnableMovementSpeed.Value then
     if LocalPlayer.Character.Humanoid.WalkSpeed ~= Options.MovementSpeed.Value then
         LocalPlayer.Character.Humanoid.WalkSpeed = Options.MovementSpeed.Value
     end
-elseif LocalPlayer.Character:GetAttribute("Climbing") then
+elseif LocalPlayer.Character:GetAttribute("Climbing") and Toggles.EnableClimbingSpeed.Value then
     if LocalPlayer.Character.Humanoid.WalkSpeed ~= Options.ClimbingSpeed.Value then
         LocalPlayer.Character.Humanoid.WalkSpeed = Options.ClimbingSpeed.Value
     end
@@ -4521,12 +4605,12 @@ end
 
 
 end
-
+--[[
 if Toggles.AntiCheatMani.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
     local currentPivot = LocalPlayer.Character:GetPivot()
     LocalPlayer.Character:PivotTo(currentPivot + (currentPivot.LookVector * -10000))
 end
-
+]]
 
 
   
@@ -4577,8 +4661,10 @@ Lighting.FogEnd = 100000
 end
 
 
-if Lighting:FindFirstChildOfClass("Atmosphere") and Lighting:FindFirstChildOfClass("Atmosphere").Density then
-Lighting:FindFirstChildOfClass("Atmosphere").Density = 0
+for _, v in pairs(Lighting:GetChildren()) do
+    if v:IsA("Atmosphere") and v.Density > 0 then
+        v.Density = 0
+    end
 end
 
 end 
@@ -4673,6 +4759,7 @@ Toggles.AutoHiding:SetValue(false)
 
 end
 
+--[[
 if Options.AntiCheatMan:GetState() and not Toggles.AntiCheatMani.Value then
 Toggles.AntiCheatMani:SetValue(true)
 
@@ -4685,7 +4772,7 @@ Toggles.AntiCheatMani:SetValue(false)
 end
 
 
-
+]]
 if Toggles.NoClip.Value then
     for _, v in ipairs(LocalPlayer.Character:GetChildren()) do
         if v:IsA("BasePart") and v.Name ~= "CollisionClone" and v.CanCollide then
@@ -4711,10 +4798,10 @@ end
 end
 
     if LocalPlayer.Character:FindFirstChild("Collision") then
-        if LocalPlayer.Character.Collision.CanCollide ~= (LocalPlayer.Character.Collision.CollisionGroup == "Player") then
-            LocalPlayer.Character.Collision.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "Player")
+        if LocalPlayer.Character.Collision.CanCollide ~= (LocalPlayer.Character.Collision.CollisionGroup == "PlayerCrouching") then
+            LocalPlayer.Character.Collision.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "PlayerCrouching")
             if LocalPlayer.Character.Collision:FindFirstChild("CollisionCrouch") then
-                LocalPlayer.Character.Collision.CollisionCrouch.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "Player")
+                LocalPlayer.Character.Collision.CollisionCrouch.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "PlayerCrouching") 
             end
         end
     end
@@ -5442,11 +5529,10 @@ if OldFogEnd then
 Lighting.FogEnd = OldFogEnd
 OldFogEnd = nil
 end
-if OldDensity then
-if Lighting:FindFirstChildOfClass("Atmosphere").Density then
-Lighting:FindFirstChildOfClass("Atmosphere").Density  = OldDensity
-end
-OldDensity = nil
+for _, v in pairs(Lighting:GetChildren()) do
+    if v:IsA("Atmosphere") then
+        v.Density = 0.94
+    end
 end
 
 
@@ -5544,6 +5630,15 @@ end
 end
 end
 end
+
+if  ReplicatedStorage:FindFirstChild("LiveModifiers") and ReplicatedStorage:FindFirstChild("LiveModifiers"):FindFirstChild("Jammin") then
+
+local Jam = LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Jam
+Jam.Playing = true 
+local Jamming = game:GetService("SoundService").Main.Jamming
+Jamming.Enabled =  true
+end
+
             Library:Unload()
 ESPLibrary:Unload()
 ShouldStop = true
