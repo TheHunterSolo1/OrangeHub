@@ -1,3 +1,7 @@
+--!strict
+--!native
+--!optimize 0
+
  local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -879,11 +883,8 @@ local Notifying = "Library"
 local PlaySound = true
 local function Notify(txt,duration)
 if Notifying == "Library" then
-Library:Notify({
-    Title = LibraryName,
-    Description = txt .. "!",
-    Time = duration,
-})
+Library:Notify(txt, duration)
+
 elseif Notifying == "Doors" then
 
 
@@ -897,150 +898,21 @@ elseif Notifying == "Doors" then
             Duration = duration,
             NotifyStyle = "Doors",
         })
- elseif Notifying == "Lava" then
-    
-    local Count = 0
-    
-    for _, v in pairs(game.CoreGui:GetChildren()) do
-        if v.Name == "LavaNotify" then
-            Count = Count + 1
-        end
-    end
-
-    local VerticalSpacing = 0.08
-    local TargetY = 0.05 + (Count * VerticalSpacing)
-
-    local LavaNotify = Instance.new("ScreenGui")
-    LavaNotify.Name = "LavaNotify"
-    LavaNotify.Parent = game.CoreGui
-    LavaNotify.DisplayOrder = 100
-
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Parent = LavaNotify
-    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 5, 5)
-    MainFrame.BorderSizePixel = 0
-    MainFrame.Position = UDim2.new(1.2, 0, TargetY, 0)
-    MainFrame.Size = UDim2.new(0.18, 0, 0.07, 0)
-    MainFrame.ClipsDescendants = true
-    
-    local UIStroke = Instance.new("UIStroke")
-    UIStroke.Thickness = 1.5
-    UIStroke.Color = Color3.fromRGB(255, 60, 0)
-    UIStroke.Transparency = 0.2
-    UIStroke.Parent = MainFrame
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 8)
-    UICorner.Parent = MainFrame
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Parent = MainFrame
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
-    TitleLabel.Size = UDim2.new(0.9, 0, 0.7, 0)
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.Text = txt
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextScaled = true
-    TitleLabel.TextWrapped = true
-    TitleLabel.ZIndex = 10
-
-    local TextConstraint = Instance.new("UITextSizeConstraint")
-    TextConstraint.MaxTextSize = 24
-    TextConstraint.MinTextSize = 12
-    TextConstraint.Parent = TitleLabel
-
-    local TextStroke = Instance.new("UIStroke")
-    TextStroke.Color = Color3.fromRGB(20, 0, 0)
-    TextStroke.Thickness = 1.2
-    TextStroke.Transparency = 0.3
-    TextStroke.Parent = TitleLabel
-
-    local TimerLine = Instance.new("Frame")
-    TimerLine.Parent = MainFrame
-    TimerLine.BackgroundColor3 = Color3.fromRGB(255, 80, 0)
-    TimerLine.BorderSizePixel = 0
-    TimerLine.Position = UDim2.new(0, 0, 0.94, 0)
-    TimerLine.Size = UDim2.new(1, 0, 0.06, 0)
-    TimerLine.ZIndex = 15
-
-    local Glow = Instance.new("ImageLabel")
-    Glow.Parent = TimerLine
-    Glow.BackgroundTransparency = 1
-    Glow.Position = UDim2.new(0, 0, -4, 0)
-    Glow.Size = UDim2.new(1, 0, 8, 0)
-    Glow.Image = "rbxassetid://5028857472"
-    Glow.ImageColor3 = Color3.fromRGB(255, 60, 0)
-    Glow.ImageTransparency = 0.3
-    Glow.ZIndex = 14
-
-    local function CreateLavaEffect(pos, size, speed, colors, z)
-        local lava = Instance.new("Frame")
-        lava.Parent = MainFrame
-        lava.Position = pos
-        lava.Size = size
-        lava.BorderSizePixel = 0
-        lava.ZIndex = z
-        lava.BackgroundTransparency = 0.15
-        
-        local grad = Instance.new("UIGradient")
-        grad.Color = ColorSequence.new(colors)
-        grad.Parent = lava
-        
-        task.spawn(function()
-            local t = 0
-            while lava and lava.Parent do
-                t = t + speed
-                grad.Offset = Vector2.new(math.sin(t) * 0.5, 0)
-                task.wait()
-            end
-        end)
-    end
-
-    CreateLavaEffect(UDim2.new(0, 0, 0, 0), UDim2.new(1, 0, 0.3, 0), 0.02, {
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 20, 0)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 60, 0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 20, 0))
-    }, 2)
-    
-    CreateLavaEffect(UDim2.new(0, 0, 0.6, 0), UDim2.new(1, 0, 0.4, 0), 0.035, {
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 40, 0)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 120, 0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 40, 0))
-    }, 5)
-
-    TweenService:Create(MainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.81, 0, TargetY, 0)
-    }):Play()
-
-    local lineTween = TweenService:Create(TimerLine, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-        Size = UDim2.new(0, 0, 0.06, 0)
-    })
-    lineTween:Play()
-
-    lineTween.Completed:Connect(function()
-        local out = TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {
-            Position = UDim2.new(1.2, 0, TargetY, 0)
-        })
-        out:Play()
-        out.Completed:Connect(function()
-            LavaNotify:Destroy()
-        end)
-    end)
-
-
+ 
 end
+
+
 if PlaySound then
 local Sound = Instance.new("Sound",game:GetService("SoundService"))
 Sound.SoundId = "rbxassetid://101511361468852"
 
+Sound.PlaybackSpeed = 0.89
 Sound.Volume = 2
 Sound:Play()
 game:GetService("Debris"):AddItem(Sound, 3)
 end
 
 end
-
 
 
  function AddESP(part,txt,color)
@@ -1122,6 +994,423 @@ end
     return table.concat(Slot)
 end
 
+if workspace:FindFirstChild("Lobby") then
+
+
+local Tabs = {
+        Main = Window:AddTab('Home', "house"),
+        Settings = Window:AddTab('Settings',"settings"),
+}
+
+local Tp = Tabs.Main:AddLeftGroupbox("Teleport")
+
+Tp:AddButton("Teleport Hotel", function()
+
+
+
+local Event = game:GetService("ReplicatedStorage").RemotesFolder.CreateElevator
+Event:FireServer(
+    {
+        Mods = {
+            "AdminPanel"
+        },
+        Settings = {},
+        Destination = "Hotel",
+        FriendsOnly = false,
+        MaxPlayers = "1"
+    }
+)
+
+
+end)
+
+
+Tp:AddButton("Teleport Mines", function()
+
+
+
+local Event = game:GetService("ReplicatedStorage").RemotesFolder.CreateElevator
+Event:FireServer(
+    {
+        Mods = {
+            "AdminPanel"
+        },
+        Settings = {},
+        Destination = "Mines",
+        FriendsOnly = false,
+        MaxPlayers = "1"
+    }
+)
+
+
+end)
+
+
+Tp:AddButton("Teleport Rooms (FREE)", function()
+
+
+
+local Event = game:GetService("ReplicatedStorage").RemotesFolder.CreateElevator
+Event:FireServer(
+    {
+        Mods = {
+            "AdminPanel"
+        },
+        Settings = {},
+        Destination = "Rooms",
+        FriendsOnly = false,
+        MaxPlayers = "1"
+    }
+)
+
+
+end)
+Tp:AddButton("Teleport Backdoor", function()
+
+
+
+local Event = game:GetService("ReplicatedStorage").RemotesFolder.CreateElevator
+Event:FireServer(
+    {
+        Mods = {
+            "AdminPanel"
+        },
+        Settings = {},
+        Destination = "Backdoor",
+        FriendsOnly = false,
+        MaxPlayers = "1"
+    }
+)
+
+
+end)
+
+Tp:AddButton("Teleport Outdoors (FREE)", function()
+
+
+
+local Event = game:GetService("ReplicatedStorage").RemotesFolder.CreateElevator
+Event:FireServer(
+    {
+        Mods = {
+            "AdminPanel"
+        },
+        Settings = {},
+        Destination = "Outdoors",
+        FriendsOnly = false,
+        MaxPlayers = "1"
+    }
+)
+
+
+end)
+
+local MenuGroup = Tabs.Settings:AddLeftGroupbox('UI Settings')
+    local UtilityBox = Tabs.Settings:AddRightGroupbox('Hub Utilities')
+
+    MenuGroup:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
+    Library.ToggleKeybind = Options.MenuKeybind
+
+    MenuGroup:AddToggle("ShowKeybinds", { Text = "Show Keybinds Overlay", Default = false }):OnChanged(function()
+        Library.KeybindFrame.Visible = Toggles.ShowKeybinds.Value
+    end)
+MenuGroup:AddToggle("ShowCustomCursor", {
+	Text = "Custom Cursor",
+	Default = true,
+	Callback = function(Value)
+		Library.ShowCustomCursor = Value
+	end,
+})
+MenuGroup:AddDivider()
+MenuGroup:AddToggle('PlayNotifySound',{
+Text = "Play Notification Sound",
+Default = true,
+Callback = function(Value)
+PlaySound = Value
+end
+})
+MenuGroup:AddDropdown("NotificationSide", {
+	Values = { "Left", "Right" },
+	Default = "Right",
+
+	Text = "Notification Side",
+
+	Callback = function(Value)
+		Library:SetNotifySide(Value)
+	end,
+})
+
+MenuGroup:AddDropdown("NotifyWay", {
+	Values = { "Doors", "Library"},
+	Default = Notifying,
+
+	Text = "Notification  Library",
+
+	Callback = function(Value)
+		Notifying = Value
+	end,
+})
+
+MenuGroup:AddButton('Test Notification',function()
+Notify("Hello World",2)
+
+end)
+
+MenuGroup:AddDropdown("Library", {
+	Values = { "Obsidian", "Linoria" },
+	Default = getgenv().ScriptLibrary,
+
+	Text = "Library",
+
+	Callback = function(Value)
+getgenv().ScriptLibrary = tostring(Value)
+Notify('Please Unload Script and Execute Again to Take Effect',4)
+	end,
+})
+
+MenuGroup:AddDivider()
+MenuGroup:AddDropdown("DPIDropdown", {
+	Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
+	Default = "100%",
+
+	Text = "DPI Scale",
+
+	Callback = function(Value)
+		Value = Value:gsub("%%", "")
+		local DPI = tonumber(Value)
+
+		Library:SetDPIScale(DPI)
+	end,
+})
+UtilityBox:AddLabel('TheHunterSolo1 - Owner & Main Coder',true)
+
+
+-- Sets the draggable label visibility
+
+UtilityBox:AddLabel('rhyan57 - Doors Notification Creator',true)
+UtilityBox:AddLabel('FireBacon - ESPLibrary Creator',true)
+    UtilityBox:AddButton({
+        Text = "Unload Hub",
+        Func = function()
+            LocalPlayer:SetAttribute("SupremeLoaded", nil)
+            for _, con in pairs(Connections) do con:Disconnect() end
+
+local Dread = LocalPlayer:FindFirstChild("Dread",true) or LocalPlayer:FindFirstChild("_Dread",true)
+
+if Dread then
+Dread.Name = "Dread"
+end
+
+local Dread = ClientModules.EntityModules:FindFirstChild("Shade",true) or ClientModules.EntityModules:FindFirstChild("_Shade",true)
+
+if Dread then
+Dread.Name = "Shade"
+end
+
+FakeA90:Destroy()
+FakeScreech:Destroy()
+
+
+if ReplicatedStorage:FindFirstChild("Screech") then 
+ReplicatedStorage:FindFirstChild("Screech").Parent = RemotesFolder
+end
+
+
+
+local fcPart = workspace:FindFirstChild("FreecamPart")
+    
+    if fcPart then
+        
+        
+        
+        fcPart:Destroy()
+        
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then root.Anchored = false end
+        
+        LocalPlayer.CameraMinZoomDistance = LocalPlayer:GetAttribute("fc_om") or 0.5
+        LocalPlayer.CameraMaxZoomDistance = LocalPlayer:GetAttribute("fc_ox") or 128
+    end
+
+
+
+
+if ReplicatedStorage:FindFirstChild("A90") then 
+ReplicatedStorage:FindFirstChild("A90").Parent = RemotesFolder
+end
+
+
+for _, v in pairs(workspace:GetDescendants()) do
+
+if v:IsA("BasePart") then
+v.CanTouch = true
+end
+if v.Name == "BridgeBarrier" then
+v:Destroy()
+end
+
+end
+
+if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+LocalPlayer.Character:SetAttribute("CanJump",false)
+for _, v in pairs(LocalPlayer.Character:GetChildren()) do
+if not (v.Name == "CollisionClone") and v:IsA("BasePart") then
+
+v.CanCollide  = true
+end
+end
+
+
+if OldAccel then
+LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = OldAccel 
+OldAccel = nil
+end
+
+LocalPlayer.Character:SetAttribute("Sliding",false)
+
+end
+for _, v in ipairs(workspace:GetDescendants()) do
+if v:IsA("ProximityPrompt") then
+
+v.HoldDuration = v:GetAttribute("Duration") or 
+v.HoldDuration 
+end
+end
+if OldFogEnd then
+Lighting.FogEnd = OldFogEnd
+OldFogEnd = nil
+end
+for _, v in pairs(Lighting:GetChildren()) do
+    if v:IsA("Atmosphere") then
+        v.Density = 0.94
+    end
+end
+
+
+
+
+
+Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+Lighting.GlobalShadows = true
+for _, v in pairs(workspace.CurrentRooms:GetChildren()) do
+v:SetAttribute("Ambient", Color3.fromRGB(0, 0, 0))
+end
+FakeScreech:Destroy()
+FakeA90:Destroy()
+
+task.wait()
+if RemotesFolder:FindFirstChild("A90_") then
+RemotesFolder:FindFirstChild("A90_").Name = "A90"
+
+end
+if RemotesFolder:FindFirstChild("Screech_") then
+local Cutscene = RemoteListener:FindFirstChild("Cutscenes") or RemoteListener:FindFirstChild("Cutscenes_")
+Cutscene.Name = "Cutscenes"
+
+
+
+RemotesFolder:FindFirstChild("Screech_").Name = "Screech"
+
+end
+
+
+
+for _, v in pairs(workspace:GetDescendants()) do
+if v:IsA("ProximityPrompt") then
+v.MaxActivationDistance = v:GetAttribute("Range") or v.MaxActivationDistance 
+end
+if v.Name == "SeekFloodline" then
+v.CanCollide = false
+end
+
+end
+
+for _, Prompt in pairs(workspace.CurrentRooms:GetDescendants()) do
+if Prompt:IsA("ProximityPrompt") then
+if Prompt.Parent then
+if Names[Prompt.Parent.Name] then
+if Prompt:GetAttribute("InfItems") then
+
+            local Fake = Prompt.Parent:FindFirstChild("InfPrompt")
+            if Fake then 
+                Fake:Destroy() 
+            end
+
+            Prompt:SetAttribute("InfItems", nil)
+            Prompt.Enabled = true
+            Prompt.ClickablePrompt = true
+        end
+
+end
+end
+end
+end
+
+if CollisionClone then
+CollisionClone:Destroy()
+CollisionClone = nil
+end
+
+if PathFolder then
+PathFolder:Destroy()
+
+end
+if LocalPlayer.Character then
+LocalPlayer.Character.Humanoid:MoveTo(LocalPlayer.Character.HumanoidRootPart.Position)
+LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(Vector3.new(0, 0, 0))
+end
+
+if RemotesFolder:FindFirstChild("Crouch") then
+RemotesFolder.Crouch:FireServer(false)
+end
+if LocalPlayer.Character then
+LocalPlayer.Character.Collision.Position = LocalPlayer.Character.HumanoidRootPart.Position
+LocalPlayer.Character.Humanoid.HipHeight =2.4
+if RemotesFolder.Name ~= "RemotesFolder" then
+LocalPlayer.Character.Collision.Position = LocalPlayer.Character.HumanoidRootPart.Position
+end
+end
+if GodmodeFolder then Folder:Destroy()
+end
+if LocalPlayer.Character then
+for _, v in pairs(LocalPlayer.Character:GetChildren()) do
+if v.Name ~= "CollisionClone"  and v.Name ~= "Collision" and v.Name ~= "HumanoidRootPart" and v.Name ~= "CollisionPart" then
+if v:IsA("BasePart") then
+v.Transparency = 0
+end
+end
+end
+end
+
+if  ReplicatedStorage:FindFirstChild("LiveModifiers") and ReplicatedStorage:FindFirstChild("LiveModifiers"):FindFirstChild("Jammin") then
+
+local Jam = LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Jam
+Jam.Playing = true 
+local Jamming = game:GetService("SoundService").Main.Jamming
+Jamming.Enabled =  true
+end
+
+            Library:Unload()
+ESPLibrary:Unload()
+ShouldStop = true
+end
+})
+
+ThemeManager:SetLibrary(Library)
+    SaveManager:SetLibrary(Library)
+    SaveManager:IgnoreThemeSettings()
+    SaveManager:SetIgnoreIndexes({'MenuKeybind'})
+    ThemeManager:SetFolder("SupremeHub")
+    SaveManager:SetFolder("SupremeHub/DOORSLOBBY")
+    SaveManager:BuildConfigSection(Tabs['Settings'])
+    ThemeManager:ApplyToTab(Tabs['Settings'])
+
+    Notify("Successfully Loaded for Game |  DOORS Lobby ",4)
+
+
+else
+
 
 
 local PathFolder = Instance.new("Folder",workspace)
@@ -1131,56 +1420,43 @@ PathFolder.Name = "PathFolder"
 
 
 
-local PathActive = false
+
 
 function PathTo(Pos)
-    local Character = LocalPlayer.Character
-    local Root = Character and Character:FindFirstChild("HumanoidRootPart")
-    local Humanoid = Character and Character:FindFirstChild("Humanoid")
-    if not Root or not Humanoid then return end
+	local Character = LocalPlayer.Character
+	local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+	local Humanoid = Character and Character:FindFirstChild("Humanoid")
+	if not Root or not Humanoid then return end
 
-    
+	
+		local p = PathfindingService:CreatePath({
+			AgentRadius = 2,
+			AgentHeight = 5,
+			AgentCanJump = false,
+			WaypointSpacing = 5,
+			AgentCanSprint = false,
+			AgentMaxSlope = 45,
+			AgentJumpHeight = 0
+		})
+local AdjustedPos = Pos + Vector3.new(0, 0, 1)
 
-    PathActive = true
-    
-    local path = PathfindingService:CreatePath({
-        AgentRadius = 2,
-        AgentHeight = 1,
-        AgentCanJump = false,
-        WaypointSpacing = 4
-    })
+			p:ComputeAsync(Root.Position, AdjustedPos)
 
-    local success, err = pcall(function()
-        path:ComputeAsync(Root.Position, Pos)
-    end)
+		if  p.Status ~= Enum.PathStatus.Success then return end
 
-    if success and path.Status == Enum.PathStatus.Success then
-        local waypoints = path:GetWaypoints()
-        PathFolder:ClearAllChildren()
-
-        for i, waypoint in ipairs(waypoints) do
-            if not PathActive then break end
-
-            local waypointDist = (Root.Position - waypoint.Position).Magnitude
-            if waypointDist >= 4 then
-                
-
-                Humanoid:MoveTo(waypoint.Position)
-                Humanoid.MoveToFinished:Wait()
-            end
-        end
-    end
+		
+		
+		for _, waypoint in ipairs(p:GetWaypoints()) do
+			local Dist = (Root.Position - waypoint.Position).Magnitude
+			if Dist > 5 then
+				Humanoid:MoveTo(waypoint.Position)
+				Humanoid.MoveToFinished:Wait()
+			end
+		end
 end
 
 
 
-
-
-
-
-
- 
- 
 
  AutoClosetTable = {
 RushMoving = 150,
@@ -1592,17 +1868,17 @@ Notify("Deleting Seek",3)
 
 for _, i  in pairs(v:GetChildren()) do
 if i.Name == "Collision" then
-i:Destroy()
+if FireTouch then
+firetouchinterest(LocalPlayer.Character.HumanoidRootPart, i, 0)
+end
 end
 end
 
 task.wait(0.5)
-for _, d in pairs(v:GetChildren()) do
-if d.Name ~= "Collision" then
-Notify("Deleted Seek Successfully",3)
-elseif d.Name == "Collision" then
-Notify("Failed To Delete Seek",3)
-end
+if v:FindFirstChild("Collision") then
+Notify("Failed to remove Seek", 3)
+else
+Notify("Deleted Seek Successfully", 3)
 end
 
 end
@@ -1733,39 +2009,13 @@ end
 })
 
 
-local DuckBoards = {}
-local Nodes = {}
-local Control
-if Require then
- Control = require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector
-end
-MinesFloor:AddToggle('AutoMinecart',{
-Text = "Auto Minecart",
+--[[
+MinesFloor:AddToggle('MinecartTP',{
+Text = "Minecart Teleport",
 Default = false,
 Disabled =  Floor.Value ~= "Mines" and true or false,
-Callback = function(Value)
-if Value then
-
-if not Require then
-Notify("Wont work cause no require support",3)
-Toggles.AutoMinecart:SetValue(false)
-end
-for _, v in pairs(workspace.CurrentRooms:GetDescendants()) do
-if v.Name == "DuckBoard" then
-table.insert(DuckBoards,v)
-end
-if  string.match(v.Name, "MinecartNode") then
-table.insert(Nodes,v)
-end
-end
-else
-table.clear(DuckBoards)
-table.clear(Nodes)
-require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = Control
-end
-end
 })
-
+]]
 
 local Anchors = {}
 
@@ -2269,6 +2519,7 @@ RiftPrompt = true,
 StarRiftPrompt = true,
 NoHidingLilBro = true,
 AnimatePrompt = true,
+RevivePrompt = true,
 
 }
 
@@ -2596,6 +2847,7 @@ DoorColor = Value
 Toggles.Door:SetValue(true)
 		end,
 	})
+
 
 ESPBox:AddToggle('Objective',{
 Text = "Objective",
@@ -3373,10 +3625,14 @@ Default = false
 	end,
 })
 
+BypassBox:AddLabel("Fake Revive When Toggled On there is no back so Toggle it based on your own Risk and if your Character Get Invisible This Mean you Lost Network OwnerShip which means its broke your Fake Revive",true)
+BypassBox:AddToggle('FakeRevive',{
+Text = "Fake Revive",
+Default = false,
+Risky = true,
+})
 
-
-
-
+local SetProperty = sethiddenproperty
 
 
 
@@ -3385,7 +3641,7 @@ Params.FilterType = Enum.RaycastFilterType.Exclude
 local Direction = Vector3.new(0, -100, 0)
 
 task.spawn(function()
-    while task.wait(0.208) do
+    while task.wait(0.212)  do
         if Library.Unloaded then break end
         local char = LocalPlayer.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -3402,6 +3658,7 @@ task.spawn(function()
             if not workspace:Raycast(hrp.Position, Direction, Params) or not Toggles.BypassSpeed.Value then
                 CollisionClone.Massless = true
             else
+
                 local cp = char:FindFirstChild("CollisionPart")
                 if cp and (cp.Anchored or Passed) then
                     CollisionClone.Massless = true
@@ -3415,7 +3672,7 @@ task.spawn(function()
                     end
                 else
                     if LocalPlayer:GetAttribute("Alive") then CollisionClone.Massless = true end
-                    task.wait(0.208)
+                    task.wait(0.212)
                     if LocalPlayer:GetAttribute("Alive") and CollisionClone and CollisionClone.Parent then
                         CollisionClone.Massless = false
                     end
@@ -3831,26 +4088,8 @@ AddESP(v.Character, v.Name .. " [" .. math.floor((hum.Health / hum.MaxHealth) * 
 })
 
 
-task.spawn(function()
-    while task.wait(1) do
-        if Toggles.Player.Value then
-            for _, v in pairs(Players:GetPlayers()) do
-                if v ~= LocalPlayer and v.Character then
-                    local hum = v.Character:FindFirstChildOfClass("Humanoid")
-                    if hum then
-                        if hum.Health > 0 then
-                            AddESP(v.Character, v.Name .. " [" .. math.floor((hum.Health / hum.MaxHealth) * 100) .. "%]", PlayerColor)
 
-                        else
-                            ESPLibrary:RemoveESP(v.Character)
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
-
+        
 
 
 
@@ -3929,12 +4168,20 @@ local function InfPrompt(Prompt)
             Clone.Parent = Prompt.Parent
             Clone.Enabled = true
             Clone.ClickablePrompt = true
-            
+task.spawn(function()
+while task.wait(0.05) do
+if not Prompt or Prompt:GetAttribute("Interactions") and Prompt:GetAttribute("Interactions") > 1 then break end
+if not Clone.Enabled then
+Clone.Enabled = true
+end
+
+end
+end)
             local Con
             Con = Clone.Triggered:Connect(function()
                 Con:Disconnect()
                 Clone:Destroy()
-              
+
                 if Char:FindFirstChild(Name) then
                     task.spawn(function()
                         local Drop = nil
@@ -4041,21 +4288,63 @@ end
 
 
 
+local InfParams = RaycastParams.new()
+InfParams.FilterType = Enum.RaycastFilterType.Exclude
+
+
 
 local AutoInteract = 0
 local AutoLibrary = 0
 local AutoAnchorSolver  = 0
 local NotifyCode = 0
 local InfItemsDelay = 0
-
-
+local PlayerESP = 0
+local NoclipDelay = 0
+local DoorReach = 0
+local NoFogDelay = 0
 table.insert(Connections,RunService.RenderStepped:Connect(function(dt)
 
-AutoInteract = AutoInteract + dt
-NotifyCode = NotifyCode + dt
-AutoLibrary = AutoLibrary + dt
-AutoAnchorSolver = AutoAnchorSolver + dt
-InfItemsDelay = InfItemsDelay + dt
+AutoInteract += dt
+NotifyCode += dt
+AutoAnchorSolver += dt
+InfItemsDelay += dt
+PlayerESP += dt
+NoclipDelay += dt
+AutoLibrary += dt
+DoorReach += dt
+NoFogDelay += dt
+
+if Toggles.FakeRevive.Value then
+local Char = LocalPlayer.Character
+if Char.Humanoid.Health == 0 then
+Char.Humanoid.Health = 100
+Notify("You Need Any Healing Source so you can Interact", 5)
+Char.HumanoidRootPart.Anchored = true
+Camera.CameraType = "Custom"
+LocalPlayer:SetAttribute("Alive", true)
+if not Char:GetAttribute("FakeRevived") then
+Char:SetAttribute("FakeRevived",true)
+end
+
+end
+
+if Char:GetAttribute("FakeRevived") then
+Char.Humanoid:SetStateEnabled("Dead", false)
+Char.Humanoid.Sit = false
+if Char:FindFirstChild("HumanoidRootPart") then
+Char.HumanoidRootPart.Anchored = false
+end
+if LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Death") then
+LocalPlayer.PlayerGui.MainUI.Initiator.Death:Destroy()
+end
+
+
+Char.Humanoid.AutomaticScalingEnabled = true
+Char:SetAttribute("Stunned", false)
+LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Enabled = not LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Enabled
+end
+
+end
 
 if not LocalPlayer:GetAttribute("Alive") then 
 if CollisionClone then
@@ -4080,7 +4369,6 @@ elseif LocalPlayer.Character:GetAttribute("Climbing") and Toggles.EnableClimbing
     end
 end
 
-
     if Toggles.ThirdPerson.Value then
         Camera.CFrame = Camera.CFrame * CFrame.new(Options.X.Value, Options.Y.Value, Options.Z.Value)
     end
@@ -4100,19 +4388,15 @@ end
         end
     end
 
+
+ 
+
     Camera.FieldOfView = Options.FOV.Value
 
 
 
 
-if Toggles.LadderBypass.Value then
-if LocalPlayer.Character:GetAttribute("Climbing") then
-LocalPlayer.Character:SetAttribute("Climbing",false)
-Notify("Anticheat Bypassed this only works until you get a cutscene or Halt",5)
 
-end
-
-end
 
 
 
@@ -4167,7 +4451,7 @@ if Toggles.Freecam.Value then
         curCam.Focus = curCam.CFrame * CFrame.new(0, 0, -10)
 
         if hum and hum.MoveDirection.Magnitude > 0 then
-            local speed = 30
+            local speed = 50
             local moveVec = hum.MoveDirection
             local localMove = curCam.CFrame:VectorToObjectSpace(moveVec)
             local finalMove = (curCam.CFrame.RightVector * localMove.X) + (curCam.CFrame.LookVector * -localMove.Z)
@@ -4212,50 +4496,40 @@ end
 
 
 
-if Toggles.AutoAnchorSolver.Value and AutoAnchorSolver > 1 and LatestRoom.Value == 50 then
-    AutoAnchorSolver = 0
-    local HintFrame = LocalPlayer.PlayerGui.MainUI:FindFirstChild("AnchorHintFrame")
+
+if Toggles.AutoAnchorSolver.Value and LatestRoom.Value == 50 and AutoAnchorSolver > 0.3 then
     
-    if Anchors and HintFrame then
-        local CodeText = HintFrame.Code.Text
-        local AnchorID = HintFrame.AnchorCode.Text
-
+AutoAnchorSolver = 0
+local Hint = LocalPlayer.PlayerGui.MainUI:FindFirstChild("AnchorHintFrame")
+    if Anchors and Hint and Hint.Visible then
+        local ID = Hint.AnchorCode.Text
         for _, v in pairs(Anchors) do
-            if v:FindFirstChild("Sign") and v.Sign.TextLabel.Text == AnchorID then
-                local Note = v:FindFirstChild("Note")
-                local FinalCode = ""
+            if v:FindFirstChild("Sign") and v.Sign.TextLabel.Text == ID then
                 
-                if not Note then
-                    FinalCode = CodeText
-                else
-                    local NoteText = Note.SurfaceGui.TextLabel.Text
-                    local Modifier = tonumber(string.match(NoteText, "%d+")) or 0
-                    local IsAddition = string.find(NoteText, "+") ~= nil
-                    
-                    for i = 1, #CodeText do
-                        local Digit = tonumber(string.sub(CodeText, i, i)) or 0
-                        local Result
-                        
-                        if IsAddition then
-                            Result = (Digit + Modifier) % 10
-                        else
-                            Result = (Digit - Modifier) % 10
-                            if Result < 0 then
-                                Result = Result + 10
-                            end
-                        end
-                        
-                        FinalCode = FinalCode .. tostring(Result)
+                  
+                    local Code = Hint.Code.Text
+                    local Note = v:FindFirstChild("Note")
+                    local NoteText = Note and Note.SurfaceGui.TextLabel.Text or ""
+                    local Mod = tonumber(string.match(NoteText, "%d+")) or 0
+                    local Final = ""
+                    for i = 1, #Code do
+                        local Digit = tonumber(string.sub(Code, i, i)) or 0
+                        local Res = string.find(NoteText, "+") and (Digit + Mod) % 10 or (Digit - Mod) % 10
+                        Final = Final .. tostring(Res < 0 and Res + 10 or Res)
                     end
+local Dis = (LocalPlayer.Character.HumanoidRootPart.Position - v:GetPivot().Position).Magnitude
+if Dis < 20 then
+local AnchorRemote = v:FindFirstChildOfClass("RemoteFunction")
+if AnchorRemote then
+                    AnchorRemote:InvokeServer(tostring(Code))
+end
+                    Notify("Anchor " .. Final, 1)
                 end
-
-                v.AnchorRemote:InvokeServer(tostring(FinalCode))
-                Notify("Anchor Code is " .. FinalCode, 1)
-                break
+end
+              
             end
         end
     end
-end
 
 
 
@@ -4269,16 +4543,17 @@ if Toggles.ShowPath.Value and Paths then
         local a0 = Instance.new("Attachment")
         a0.Name = "PathAttach"
         a0.Parent = v
+game:GetService("Debris"):AddItem(a0, 60)
 
         local beam = Instance.new("Beam")
         beam.Name = "PathBeam"
         beam.Attachment0 = a0
         beam.FaceCamera = true
-        beam.Width0, beam.Width1 = 0.5, 0.5
+        beam.Width0, beam.Width1 = 1, 1
 beam.Color = ColorSequence.new(Color3.new(0, 1, 0))
 
         beam.Parent = v
-
+game:GetService("Debris"):AddItem(beam, 60)
         local closestPart = nil
         local shortestDist = math.huge
 
@@ -4297,6 +4572,7 @@ beam.Color = ColorSequence.new(Color3.new(0, 1, 0))
             a1.Name = "PathAttach"
             a1.Parent = closestPart
             beam.Attachment1 = a1
+game:GetService("Debris"):AddItem(a1, 60)
         end
         
         table.remove(Paths, i)
@@ -4319,73 +4595,91 @@ end
 
 
 
-
-
-
+--[[
 if Toggles.AutoMinecart.Value and Camera:FindFirstChild("MinecartRig") then
-if LatestRoom.Value < 49 then
-if not LocalPlayer:GetAttribute("NotifyMinecart") then
-Notify("[Auto Minecart] Please dont do anything while Auto Minecart Enabled", 5)
-LocalPlayer:SetAttribute("NotifyMinecart", true)
+    if LatestRoom.Value < 49 then
+        if not LocalPlayer:GetAttribute("NotifyMinecart") then
+            Notify("[Auto Minecart] Please dont do anything while Auto Minecart Enabled", 5)
+            LocalPlayer:SetAttribute("NotifyMinecart", true)
+        end
+        local RootPart = LocalPlayer.Character.HumanoidRootPart
+        local ClosestDuckDist = math.huge
+        for _, v in pairs(DuckBoards) do
+            local Dist = (RootPart.Position - v:GetPivot().Position).Magnitude
+            if Dist < ClosestDuckDist then
+                ClosestDuckDist = Dist
+            end
+        end
+        if RequiredMainGame.crouching ~= (ClosestDuckDist < 30) then
+            RequiredMainGame.crouching = (ClosestDuckDist < 30)
+        end
+        local CurrentNode = nil
+        local MinDist = math.huge
+        for _, Node in pairs(Nodes) do
+            local Dist = (RootPart.Position - Node.Position).Magnitude
+            if Dist < MinDist then
+                MinDist = Dist
+                CurrentNode = Node
+            end
+        end
+        if CurrentNode then
+            local CurrentNum = tonumber(string.match(CurrentNode.Name, "%d+"))
+            if CurrentNum then
+                local Node1
+                for _, Node in pairs(Nodes) do
+                    if Node.Name == "MinecartNode" .. tostring(CurrentNum + 1) then
+                        Node1 = Node
+                        break
+                    end
+                end
+                if Node1 then
+                    local dot = (Node1.Position - CurrentNode.Position).Unit:Dot(RootPart.CFrame.RightVector)
+local Dis = (LocalPlayer.Character.HumanoidRootPart.Position - Node1.Position).Magnitude
+if Dis < 30 then
+                    require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
+                        if dot > 0.15 then
+                            return Vector3.new(1, 0, 0)
+                        elseif dot < -0.15 then
+                            return Vector3.new(-1, 0, 0)
+                        end
+                        return Vector3.new(0, 0, -1)
+                    end
+                end
+            end
+          end
+        end
+    elseif LatestRoom.Value >= 50 then
+        if LocalPlayer:GetAttribute("NotifyMinecart") then
+            Notify("[Auto Minecart] you can control now", 5)
+            LocalPlayer:SetAttribute("NotifyMinecart", false)
+        end
+        Toggles.AutoMinecart:SetValue(false)
+        require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = Control
+    end
 end
-local RootPart = LocalPlayer.Character.HumanoidRootPart
-local ClosestDuckDist = math.huge
-for _, v in pairs(DuckBoards) do
-local Dist = (RootPart.Position - v:GetPivot().Position).Magnitude
-if Dist < ClosestDuckDist then
-ClosestDuckDist = Dist
+
+]]
+
+--[[
+if Toggles.MinecartTP.Value then
+
+
+
+ if LatestRoom.Value < 49 and  Camera:FindFirstChild("MinecartRig") then
+
+RemotesFolder.MinecartPos:FireServer(
+workspace.CurrentRooms[LatestRoom.Value].Door:GetPivot()
+)
+Camera.MinecartRig.Root.CFrame = workspace.CurrentRooms[LatestRoom.Value].Door.Door.CFrame
 end
+
 end
-if RequiredMainGame.crouching ~= (ClosestDuckDist < 30) then
-RequiredMainGame.crouching = (ClosestDuckDist < 30)
-end
-local CurrentNode = nil
-local MinDist = math.huge
-for _, Node in pairs(Nodes) do
-if Node:GetAttribute("ForceConnect") == "Normal" then
-local Dist = (RootPart.Position - Node.Position).Magnitude
-if Dist < MinDist then
-MinDist = Dist
-CurrentNode = Node
-end
-end
-end
-if CurrentNode then
-local CurrentNum = tonumber(string.match(CurrentNode.Name, "%d+"))
-if CurrentNum then
-local Node1
-for _, Node in pairs(Nodes) do
-if Node.Name == "MinecartNode" .. tostring(CurrentNum + 2) then
-Node1 = Node
-break
-end
-end
-require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
-local MoveDir = Vector3.new(0, 0, -1)
-if Node1 then
-local Rel1 = RootPart.CFrame:PointToObjectSpace(Node1.Position)
-local Dist1 = Rel1.Magnitude
-if Dist1 < 25 then
-if Rel1.X > 0.12 then
-MoveDir = Vector3.new(1, 0, 0)
-elseif Rel1.X < -0.12 then
-MoveDir = Vector3.new(-1, 0, 0)
-end
-end
-end
-return MoveDir
-end
-end
-end
-elseif LatestRoom.Value >= 50 then
-if LocalPlayer:GetAttribute("NotifyMinecart") then
-Notify("[Auto Minecart] you can control now", 5)
-LocalPlayer:SetAttribute("NotifyMinecart", false)
-end
-Toggles.AutoMinecart:SetValue(false)
-require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = Control
-end
-end
+]]
+
+
+
+
+
 
 
 
@@ -4485,8 +4779,8 @@ if Toggles.Godmode.Value then
             LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(0, -2.2, 0)
         end
 
-        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.2 then
-            LocalPlayer.Character.Humanoid.HipHeight = 0.2
+        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.25 then
+            LocalPlayer.Character.Humanoid.HipHeight = 0.25
         end
 
         if LocalPlayer.Character.Collision.Size ~= Vector3.new(1, 1, 3) then
@@ -4498,7 +4792,7 @@ if Toggles.Godmode.Value then
         end
     end
 
-    if Floor.Value == "Fools" and not Toggles.NoClip.Value then
+    if (Floor.Value == "Fools" or RemotesFolder.Name == "Bricks") and not Toggles.NoClip.Value then
         Toggles.NoClip:SetValue(true)
     end
 end
@@ -4509,7 +4803,8 @@ if LocalPlayer.Character:FindFirstChild("CollisionPart") then
 CollisionClone = LocalPlayer.Character.CollisionPart:Clone()
 CollisionClone.Parent = LocalPlayer.Character 
 CollisionClone.Name = "CollisionClone"
-
+CollisionClone.RootPriority = 127
+CollisionClone.Anchored = false
 CollisionClone.CanCollide = false
 
 
@@ -4535,7 +4830,85 @@ end
 
 
 
-if Toggles.AutoLibraryCode.Value and AutoLibrary > 0.3 then
+
+    
+if Toggles.AutoRooms.Value then
+        
+        if Toggles.IgnoreA60.Value and not Toggles.Godmode.Value then
+            Toggles.Godmode:SetValue(true)
+            Notify("Godmode Enabled Automatically For Ignore A-60", 5)
+        end
+
+        LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 3)
+
+        local DangerousEntity = workspace:FindFirstChild("A120") or workspace:FindFirstChild("GlitchRush") or workspace:FindFirstChild("GlitchAmbush")
+        local A60 = workspace:FindFirstChild("A60")
+        
+        local ShouldHide = false
+
+        if DangerousEntity and DangerousEntity.PrimaryPart and DangerousEntity.PrimaryPart.Position.Y > -4 then
+            ShouldHide = true
+        elseif A60 and A60.PrimaryPart and A60.PrimaryPart.Position.Y > -4 then
+            if not Toggles.IgnoreA60.Value then
+                ShouldHide = true
+            end
+        end
+
+        if ShouldHide then
+            local Closet = GetNearestHidingSpot()
+            if Closet and Closet.HiddenPlayer and Closet.HiddenPlayer.Value == nil then
+                Closet.Base.CanCollide = false
+                PathTo(Closet.Base.Position)
+                if not LocalPlayer.Character.CollisionPart.Anchored then
+                    fireproximityprompt(Closet.HidePrompt)
+                end
+            end
+        else
+            LocalPlayer.Character:SetAttribute("Hiding", false)
+            local CurrentRoom = workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+            if CurrentRoom then
+                local TargetDoor = CurrentRoom:FindFirstChild("Door")
+                if TargetDoor and TargetDoor:FindFirstChild("Door") then
+                    PathTo(TargetDoor.Door.Position)
+                end
+            end
+        end
+    end
+
+
+
+
+if Toggles.InfCrucifix.Value and not Toggles.Godmode.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    local Origin = LocalPlayer.Character.HumanoidRootPart.Position
+    
+    for _, Entity in pairs(workspace:GetChildren()) do
+        local Range = InfCrucfixTable[Entity.Name]
+        if Range and Entity.PrimaryPart then
+            local Target = Entity.PrimaryPart.Position
+            
+            if (Origin - Target).Magnitude < Range then
+                InfParams.FilterDescendantsInstances = {LocalPlayer.Character, Entity}
+                
+                if not workspace:Raycast(Origin, Target - Origin, InfParams) then
+                    local Tool = LocalPlayer.Character:FindFirstChild("Crucifix")
+                    if Tool then
+                        RemotesFolder.DropItem:FireServer(Tool)
+                        repeat task.wait()
+                            local Drop = workspace.Drops:FindFirstChild("Crucifix")
+                            if Drop and Drop:FindFirstChildOfClass("ProximityPrompt") then
+                                fireproximityprompt(Drop:FindFirstChildOfClass("ProximityPrompt"))
+                            end
+                        until LocalPlayer.Character:FindFirstChild("Crucifix")
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+
+if Toggles.AutoLibraryCode.Value and AutoLibrary > 0.2 then
     AutoLibrary = 0
     if LatestRoom.Value == 50 then
         local Code = GetLibraryCode()
@@ -4555,10 +4928,11 @@ end
 
 
 
-if Toggles.DoorReach.Value then
-
+if Toggles.DoorReach.Value and DoorReach > 0.3 then
+DoorReach = 0
 local Door = workspace.CurrentRooms[LatestRoom.Value].Door
 if Door.Parent and Door.Parent.Name ~= "101" then
+
 Door.ClientOpen:FireServer()
 end
 end
@@ -4586,10 +4960,7 @@ end
 
 end
 
-if Toggles.AntiCheatMani.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-    local currentPivot = LocalPlayer.Character:GetPivot()
-    LocalPlayer.Character:PivotTo(currentPivot + (currentPivot.LookVector * -10000))
-end
+
 
 
 
@@ -4611,7 +4982,7 @@ if Toggles.AutoInteract.Value then
             if prompt.Parent.Parent and prompt.Parent.Parent.Parent and prompt.Parent.Parent.Parent.Name == "ItemSpawns" then
                 continue
             end
- if prompt:GetAttribute("InfItems")  then continue end
+ if prompt:GetAttribute("InfItems")  and prompt.Name ~= "InfPrompt" then continue end
 if prompt.Parent.Name == "Mandrake" then continue end
             if not prompt:GetAttribute("Interactions") or prompt:GetAttribute("Interactions") < 1 then
                 if prompt.Parent:IsA("BasePart") or prompt.Parent:IsA("Model") then
@@ -4635,7 +5006,8 @@ end
 
 
 
-if Toggles.NoFog.Value then
+if Toggles.NoFog.Value and NoFogDelay > 0.5 then
+NoFogDelay = 0
 if Lighting.FogEnd < 100000 then
 Lighting.FogEnd = 100000
 end
@@ -4654,6 +5026,44 @@ if RequiredMainGame then
 RequiredMainGame.csgo = CFrame.new(0,0,0)
 end
 end
+
+
+
+
+if Toggles.Player.Value and PlayerESP > 1 then
+PlayerESP = 0
+            for _, v in pairs(Players:GetPlayers()) do
+                if v ~= LocalPlayer and v.Character then
+                    local hum = v.Character:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        if hum.Health > 0 then
+                            AddESP(v.Character, v.Name .. " [" .. math.floor((hum.Health / hum.MaxHealth) * 100) .. "%]", PlayerColor)
+
+                        else
+                            ESPLibrary:RemoveESP(v.Character)
+                        end
+                    end
+                end
+            end
+        end
+
+
+
+if Toggles.InfRevive.Value then
+if not LocalPlayer:GetAttribute("Alive") then
+RemotesFolder.Revive:FireServer()
+end
+end
+
+if Toggles.LadderBypass.Value then
+if LocalPlayer.Character:GetAttribute("Climbing") then
+LocalPlayer.Character:SetAttribute("Climbing",false)
+Notify("Anticheat Bypassed this only works until you get a cutscene or Halt",5)
+
+end
+
+end
+
 
 
 
@@ -4691,6 +5101,12 @@ if Toggles.FullBright.Value then
     end
 end
 
+
+if Toggles.AntiCheatMani.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    local currentPivot = LocalPlayer.Character:GetPivot()
+    LocalPlayer.Character:PivotTo(currentPivot  * CFrame.new(0, 0, 10000))
+
+end
 
 
 if Options.AutoInteractKeybind:GetState() and not Toggles.AutoInteract.Value then
@@ -4753,7 +5169,8 @@ end
 
 
 
-if Toggles.NoClip.Value then
+if Toggles.NoClip.Value and NoclipDelay > 0.2 then
+NoclipDelay = 0
     for _, v in ipairs(LocalPlayer.Character:GetChildren()) do
         if v:IsA("BasePart") and v.Name ~= "CollisionClone" and v.CanCollide then
             v.CanCollide = false
@@ -4767,8 +5184,8 @@ if Toggles.NoClip.Value then
     end
 end
 
-if not Toggles.NoClip.Value then
-
+if not Toggles.NoClip.Value and NoclipDelay > 0.2 then
+NoclipDelay = 0
 for _, v in pairs(LocalPlayer.Character:GetChildren()) do
 if not (v.Name == "CollisionClone" or v.Name == "Collision") then
 if v:IsA("BasePart") and not v.CanCollide then
@@ -4792,11 +5209,8 @@ end
 
 
 if Toggles.FastClosetExit.Value then
-if LocalPlayer.Character:GetAttribute("Hiding") then
-if LocalPlayer.Character.Humanoid.MoveDirection.Magnitude > 0.45 then
+if LocalPlayer.Character:GetAttribute("Hiding") and LocalPlayer.Character.Humanoid.MoveDirection.Magnitude > 0.45 then
 CamLock:FireServer()
-
-end
 end
 end
 
@@ -4807,31 +5221,32 @@ end))
 
 
 
+table.insert(Connections, LatestRoom:GetPropertyChangedSignal("Value"):Connect(function()
+if LocalPlayer.Character:GetAttribute("FakeRevived") then
+task.wait(0.3)
 
+LocalPlayer:SetAttribute("CurrentRoom", tonumber(LatestRoom.Value))
 
-
+end
+end))
 
 if HookMeta then
-    local Success = pcall(function()
-        local Old
-        Old = hookmetamethod(game, "__namecall", function(Self, ...)
-            local Method = getnamecallmethod()
-            
-            if Method == "FireServer" or Method == "InvokeServer" then
-                if Toggles.AutoHeartbeat.Value and (Self == ClutchHeartbeat or Self.Name == "ClutchHeartbeat") then
-                    return true
-                end
-
-                if Method == "FireServer" then
-                    
-                    if Toggles.FigureHearing.Value and Self.Name == "Crouch" then
-                        return Old(Self, true)
-                    end
-                end
-            end
-
+    local Old
+    Old = hookmetamethod(game, "__namecall", function(Self, ...)
+        if Library.Unloaded then
             return Old(Self, ...)
-        end)
+        end
+        
+        local Method = getnamecallmethod()
+        if Method == "FireServer" or Method == "InvokeServer" then
+            if Toggles.AutoHeartbeat.Value and Self.Name == "ClutchHeartbeat" then
+                return true
+            end
+            if Method == "FireServer" and Toggles.FigureHearing.Value and Self.Name == "Crouch" then
+                return Old(Self, true)
+            end
+        end
+        return Old(Self, ...)
     end)
 end
 
@@ -4840,103 +5255,14 @@ end
 
 
 
-task.spawn(function()
-while task.wait(0.99) do
-if Library.Unloaded then break end
-if Toggles.InfRevive.Value then
-if not LocalPlayer:GetAttribute("Alive") then
-RemotesFolder.Revive:FireServer()
-end
-end
-
-end
-
-end)
-
-
-local InfParams = RaycastParams.new()
-InfParams.FilterType = Enum.RaycastFilterType.Exclude
-
-table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
-    if LocalPlayer:GetAttribute("Alive") then
-if Toggles.AutoRooms.Value then
-        
-        if Toggles.IgnoreA60.Value and not Toggles.Godmode.Value then
-            Toggles.Godmode:SetValue(true)
-            Notify("Godmode Enabled Automatically For Ignore A-60", 5)
-        end
-
-        LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 3)
-
-        local DangerousEntity = workspace:FindFirstChild("A120") or workspace:FindFirstChild("GlitchRush") or workspace:FindFirstChild("GlitchAmbush")
-        local A60 = workspace:FindFirstChild("A60")
-        
-        local ShouldHide = false
-
-        if DangerousEntity and DangerousEntity.PrimaryPart and DangerousEntity.PrimaryPart.Position.Y > -4 then
-            ShouldHide = true
-        elseif A60 and A60.PrimaryPart and A60.PrimaryPart.Position.Y > -4 then
-            if not Toggles.IgnoreA60.Value then
-                ShouldHide = true
-            end
-        end
-
-        if ShouldHide then
-            local Closet = GetNearestHidingSpot()
-            if Closet then
-                Closet.Base.CanCollide = false
-                PathTo(Closet.Base.Position)
-                if not LocalPlayer.Character.CollisionPart.Anchored then
-                    fireproximityprompt(Closet.HidePrompt)
-                end
-            end
-        else
-            LocalPlayer.Character:SetAttribute("Hiding", false)
-            local CurrentRoom = workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
-            if CurrentRoom then
-                local TargetDoor = CurrentRoom:FindFirstChild("Door")
-                if TargetDoor and TargetDoor:FindFirstChild("Door") then
-                    PathTo(TargetDoor.Door.Position)
-                end
-            end
-        end
-    end
 
 
 
 
-if Toggles.InfCrucifix.Value and not Toggles.Godmode.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-    local Origin = LocalPlayer.Character.HumanoidRootPart.Position
-    
-    for _, Entity in pairs(workspace:GetChildren()) do
-        local Range = InfCrucfixTable[Entity.Name]
-        if Range and Entity.PrimaryPart then
-            local Target = Entity.PrimaryPart.Position
-            
-            if (Origin - Target).Magnitude < Range then
-                InfParams.FilterDescendantsInstances = {LocalPlayer.Character, Entity}
-                
-                if not workspace:Raycast(Origin, Target - Origin, InfParams) then
-                    local Tool = LocalPlayer.Character:FindFirstChild("Crucifix")
-                    if Tool then
-                        RemotesFolder.DropItem:FireServer(Tool)
-                        repeat task.wait()
-                            local Drop = workspace.Drops:FindFirstChild("Crucifix")
-                            if Drop and Drop:FindFirstChildOfClass("ProximityPrompt") then
-                                fireproximityprompt(Drop:FindFirstChildOfClass("ProximityPrompt"))
-                            end
-                        until LocalPlayer.Character:FindFirstChild("Crucifix")
-                    end
-                end
-            end
-        end
-    end
-end
 
 
 
-end
-end))
+
 
 
 
@@ -5062,20 +5388,10 @@ table.insert(Figures,v)
 end
 end
 
-if Toggles.AutoMinecart.Value then
-
-if v.Name == "DuckBoard" then
-
-table.insert(DuckBoards,v)
-end
 
 
-if  string.match(v.Name, "MinecartNode") then
 
-table.insert(Nodes,v)
-end
 
-end
 
 
 
@@ -5345,8 +5661,8 @@ MenuGroup:AddDropdown("NotificationSide", {
 })
 
 MenuGroup:AddDropdown("NotifyWay", {
-	Values = { "Library", "Doors", "Lava"},
-	Default = "Library",
+	Values = { "Doors", "Library"},
+	Default = Notifying,
 
 	Text = "Notification  Library",
 
@@ -5390,30 +5706,7 @@ UtilityBox:AddLabel('TheHunterSolo1 - Owner & Main Coder',true)
 
 
 -- Sets the draggable label visibility
-if getgenv().ScriptLibrary == "Obsidian" then
-local DraggableLabel = Library:AddDraggableLabel("Supreme Hub")
-DraggableLabel:SetVisible(true)
- 
--- Example of dynamically-updating draggable label with common traits (fps and ping)
-local FrameTimer = tick()
-local FrameCounter = 0;
-local FPS = 60;
- 
-local WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(function()
-    FrameCounter += 1;
- 
-    if (tick() - FrameTimer) >= 1 then
-        FPS = FrameCounter;
-        FrameTimer = tick();
-        FrameCounter = 0;
-    end;
- 
-    DraggableLabel:SetText(('Supreme Hub | %s fps | %s ms'):format(
-        math.floor(FPS),
-        math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue())
-    ));
-end);
-end
+
 UtilityBox:AddLabel('rhyan57 - Doors Notification Creator',true)
 UtilityBox:AddLabel('FireBacon - ESPLibrary Creator',true)
     UtilityBox:AddButton({
@@ -5636,5 +5929,7 @@ ThemeManager:SetLibrary(Library)
     Notify("Successfully Loaded for Game |  DOORS ",4)
 
 
+
+end
 
 end
