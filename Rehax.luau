@@ -1,6 +1,6 @@
 --!strict
 --!native
---!optimize 0
+--!optimize 2
 
  local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -30,7 +30,7 @@ local LibraryName = 'Supreme Hub'
 if game.PlaceId == 126509999114328 then 
 
 local repo = 'https://raw.githubusercontent.com/mstudio45/Obsidian/main/'
-    local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/bocaj111004/ESPLibrary/refs/heads/main/Library.lua"))() -- Loading the library
+    local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/main/ESPLibrary"))() -- Loading the library
 
     local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
     local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
@@ -865,7 +865,21 @@ local NotifyLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com
 task.wait()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
     local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
-    local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/bocaj111004/ESPLibrary/refs/heads/main/Library.lua"))() -- Loading the library
+    local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/main/ESPLibrary"))() -- Loading the library
+
+local NotificationLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/projects/refs/heads/main/UI/NotificationLibrary/Source.luau"))()
+local NotificationHandler = NotificationLibrary:New({
+	BackgroundColor = Color3.fromRGB(100, 100, 100), -- background color of the notification
+	-- TitleColor = Color3.fromRGB(), -- title text color
+	-- DescriptionColor = Color3.fromRGB(), -- description text color
+	-- Mode = "Light", -- either "Dark" or "Light" | very important to set this so it looks better
+	VerticalPosition = "Top", -- either "Top" or "Bottom"
+	HorizontalPosition = "Right", -- either "Right" or "Left"
+})
+
+
+	
+
 
 
 local Options = Library.Options
@@ -879,7 +893,7 @@ local Window = Library:CreateWindow({
 NotifySide = "Right",
 	ShowCustomCursor = true,
     })
-local Notifying = "Library"
+local Notifying = "Supreme"
 local PlaySound = true
 local function Notify(txt,duration)
 if Notifying == "Library" then
@@ -899,14 +913,24 @@ elseif Notifying == "Doors" then
             NotifyStyle = "Doors",
         })
  
-end
 
+elseif Notifying == "Supreme" then
+NotificationHandler:Create({
+		Title = "Supreme Hub",
+		Description = txt,
+		Duration = duration,
+		Image = "",
+	})
+
+
+
+end
 
 if PlaySound then
 local Sound = Instance.new("Sound",game:GetService("SoundService"))
 Sound.SoundId = "rbxassetid://101511361468852"
 
-Sound.PlaybackSpeed = 0.89
+Sound.PlaybackSpeed = 0.77
 Sound.Volume = 2
 Sound:Play()
 game:GetService("Debris"):AddItem(Sound, 3)
@@ -958,7 +982,7 @@ end
 
  function GetLibraryCode()
     local CodeLength = game.ReplicatedStorage.GameData.Floor.Value == "Fools" and 10 or 5
-    local Slot = table.create(CodeLength, "x")
+    local Slot = table.create(CodeLength, "_")
     local Paper
 
     for _, plr in pairs(Players:GetPlayers()) do
@@ -1486,7 +1510,7 @@ local Require = ExecutorSupport.require
 local ReplicateSignal = ExecutorSupport.replicatesignal
 local FireTouch = ExecutorSupport.firetouchinterest
 local HookMeta = ExecutorSupport.hookmetamethod
-
+local IsNetworkOwner = ExecutorSupport.isnetworkowner
  Items = {
 ["Bandage"] = "Bandage",
 ["Flashlight"] = "Flash light",
@@ -1609,6 +1633,17 @@ if Require then
 RequiredMainGame = require(MainGame)
 end
 
+
+
+local getcons = getconnections or get_signal_cons or get_relative_connections
+
+if getcons then
+    for _, con in pairs(getcons(LocalPlayer.Idled)) do
+        if con.Disable then 
+            con:Disable() 
+        end
+    end
+end
 
 
 
@@ -1858,7 +1893,7 @@ Default = false
 FoolsFloor:AddToggle('DeleteSeekFE',{
 Text = "Delete Seek (FE)",
 Default = false,
-Disabled = Floor.Value ~= "Fools" and RemotesFolder.Name ~= "Bricks" and true or false,
+Disabled = Floor.Value ~= "Fools" and RemotesFolder.Name ~= "Bricks"   and true or false,
 Callback = function(Value)
 if Value then
  for _, v in pairs(workspace.CurrentRooms:GetDescendants()) do
@@ -1932,10 +1967,7 @@ Text = "Delete Figure (FE)",
 Default = false,
 Disabled = Floor.Value ~= "Mines" and   RemotesFolder.Name ~= "Bricks" and true or false,
 Callback = function(Value)
-if not isnetworkowner then
-Notify("[Delete Figure] This Feature Wont Support your Executor sadly",5)
-Toggles.DeleteFigureFE:SetValue(false)
-end
+
 for _, v in pairs(workspace.CurrentRooms:GetDescendants()) do
 if v.Name == "FigureRig" or v.Name == "FigureRagdoll" then
 table.insert(Figures,v)
@@ -2007,15 +2039,37 @@ end
 end
 end
 })
+local DuckBoards = {}
+local Nodes = {}
 
-
---[[
-MinesFloor:AddToggle('MinecartTP',{
-Text = "Minecart Teleport",
+if Require then
+local Control = require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector
+end
+MinesFloor:AddToggle('AutoMinecart',{
+Text = "Auto Minecart",
 Default = false,
+Visible = false,
 Disabled =  Floor.Value ~= "Mines" and true or false,
+Callback = function(Value)
+if Value then
+for _, v in workspace.CurrentRooms:GetDescendants() do
+if v.Name == "DuckBoard" then
+table.insert(DuckBoards, v)
+end
+if string.find(v.Name, "MinecartNode") then
+table.insert(Nodes, v)
+end
+
+end
+
+else
+require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = Control
+table.clear(Nodes)
+table.clear(DuckBoards)
+end
+end
 })
-]]
+
 
 local Anchors = {}
 
@@ -2074,6 +2128,29 @@ end
 end
 })
 
+if (getrawmetatable or debug.getmetatable) and (setreadonly or make_writeable) and newcclosure then
+    local getmt = getrawmetatable or debug.getmetatable
+    local setro = setreadonly or (make_writeable and function(t, b) if b then make_writeable(t) else make_readonly(t) end end)
+    
+    local mt = getmt(game)
+    local oldIndex = mt.__index
+    
+    setro(mt, false)
+    
+    mt.__index = newcclosure(function(t, k)
+        if not checkcaller() and k == "MoveDirection" and t:IsA("Humanoid") then
+            local char = LocalPlayer.Character
+            if char and Toggles.AutoRooms.Value and not char:GetAttribute("Hiding") then
+                return Vector3.new(0, 0, 1)
+            end
+        end
+        return oldIndex(t, k)
+    end)
+    
+    setro(mt, true)
+end
+
+
 
 RoomsFloor:AddToggle('IgnoreA60',{
 Text = "Ignore A-60",
@@ -2087,7 +2164,7 @@ Disabled = Floor.Value ~= "Rooms" and true or false,
 
 ESPSettings:AddToggle('ShowDistance',{
 Text = "Show ESP Distance",
-Default = false,
+Default = true,
 Callback = function(Value)
 ESPLibrary:SetShowDistance(Value)
 end
@@ -2095,13 +2172,21 @@ end
 
 ESPSettings:AddToggle('ShowTracers',{
 Text = "Show ESP Tracers",
-Default = false,
+Default = true,
 Callback = function(Value)
 ESPLibrary:SetTracers(Value)
 end
 })
 
 
+ESPSettings:AddToggle('ShowArrows',{
+Text = "Show ESP Arrows",
+Default = true,
+Visible = false,
+Callback = function(Value)
+ESPLibrary:SetArrows(Value)
+end
+})
 
 ESPSettings:AddToggle('ShowRainbow',{
 Text = "Show ESP Rainbow",
@@ -2113,59 +2198,18 @@ end
 
 
 
-ESPSettings:AddToggle('ShowArrows',{
-Text = "Show Arrows",
-Default = false,
-Callback = function(Value)
-ESPLibrary:SetArrows(Value)
-end
-})
 
-ESPLibrary:SetFadeTime(0.5)
-
-ESPSettings:AddSlider("FadeTime", {
-	Text = "Fade Time",
-	Default = 0.5,
-	Min = 0,
-	Max = 1,
-	Rounding = 1,
-	Compact = false,
-
-	Callback = function(Value)
-ESPLibrary:SetFadeTime(Value)
-	end,
-
-	Tooltip = "Fade Time", 
-})
-
-
-
-ESPSettings:AddSlider("ArrowsRadius", {
-	Text = "Arrows Radius",
-	Default = 200,
-	Min = 200,
-	Max = 600,
-	Rounding = 1,
-	Compact = false,
-
-	Callback = function(Value)
-ESPLibrary:SetArrowRadius(Value)
-	end,
-
-	Tooltip = "Arrows Radius", 
-})
-
-
-ESPSettings:AddDropdown("SetTracerOrigin", {
-    Text = "Set Tracer Origin",
-    Values = {"Bottom", "Top", "Center", "Mouse"},
+ESPSettings:AddDropdown("SetESPMode", {
+    Text = "Set ESP Mode",
+    Values = {"Highlight/Text", "Text", "Highlight"},
 
     Default = 1,
     Multi = false,
 Callback = function(Value)
-ESPLibrary:SetTracerOrigin(Value)
+ESPLibrary:SetESPMode(Value)
 end
 })
+
 
 
 
@@ -2182,7 +2226,7 @@ ESPSettings:AddDropdown("SetFont", {
     "RobotoMono", "Sarpanch", "SpecialElite", "TitilliumWeb", "Ubuntu"
 },
 
-    Default = 39,
+    Default = 35,
     Multi = false,
 Callback = function(Value)
 ESPLibrary:SetFont(Value)
@@ -2590,10 +2634,12 @@ local Closest = nil
 local MaxDistance = math.huge
 if #Closets > 0 then
 for _, v in pairs(Closets) do
+if v:FindFirstChild("HiddenPlayer") and v.HiddenPlayer.Value == nil then
 local Dis = (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude
 if Dis < MaxDistance then
 Closest = v
 MaxDistance = Dis
+end
 end
 end
 end
@@ -2826,17 +2872,23 @@ Default = false,
 Callback = function(Value)
 if Value then
 local Doo = workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1].Door.Door
+if Doo:FindFirstChild("CrossBoards") then
+AddESP(Doo.CrossBoards, "",  DoorColor)
+AddESP(workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")].Door.Door.CrossBoards, "", DoorColor) 
+end
 AddESP(Doo, "Door " .. Doo.Parent:GetAttribute("RoomID"), DoorColor)
 AddESP(workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")].Door.Door, "Door " .. workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")].Door:GetAttribute("RoomID"), DoorColor) 
 
 else
 for _, v in ipairs(workspace.CurrentRooms:GetChildren()) do
 ESPLibrary:RemoveESP(v.Door.Door)
+if v.Door.Door:FindFirstChild("CrossBoards") then
+ESPLibrary:RemoveESP(v.Door.Door.CrossBoards)
 end
 
 end
 end
-
+end
 }):AddColorPicker("ColorPicker2", {
 		Default = DoorColor,
 		Title = "Door ESP Color",
@@ -3589,6 +3641,17 @@ Options.FlightSpeed:SetMax(Value and 75 or 21)
 end
 })
 
+BypassBox:AddDropdown("SpeedBypassMethod", {
+	Values = { "Method 1", "Method 2" },
+	Default = 1,
+
+	Text = "Speed Bypass Method",
+
+	Callback = function(Value)
+
+	end,
+})
+
 
 
 BypassBox:AddDivider()
@@ -3632,7 +3695,6 @@ Default = false,
 Risky = true,
 })
 
-local SetProperty = sethiddenproperty
 
 
 
@@ -3641,8 +3703,16 @@ Params.FilterType = Enum.RaycastFilterType.Exclude
 local Direction = Vector3.new(0, -100, 0)
 
 task.spawn(function()
-    while task.wait(0.212)  do
+    while task.wait(Options.SpeedBypassMethod.Value == "Method 1" and 0 or 0.209)
+
+do
         if Library.Unloaded then break end
+if Options.SpeedBypassMethod.Value == "Method 1" then
+CollisionClone.Massless = true
+RemotesFolder.Crouch:FireServer(true, true)
+elseif  Options.SpeedBypassMethod.Value == "Method 2" then
+
+
         local char = LocalPlayer.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         
@@ -3672,13 +3742,14 @@ task.spawn(function()
                     end
                 else
                     if LocalPlayer:GetAttribute("Alive") then CollisionClone.Massless = true end
-                    task.wait(0.212)
+                    task.wait(0.209)
                     if LocalPlayer:GetAttribute("Alive") and CollisionClone and CollisionClone.Parent then
                         CollisionClone.Massless = false
                     end
                 end
             end
         end
+end
     end
 end)
 
@@ -3858,14 +3929,26 @@ if Toggles.Door.Value then
 local OldDoor = workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") - 1].Door.Door
 if OldDoor then
 ESPLibrary:RemoveESP(OldDoor)
+if OldDoor:FindFirstChild("CrossBoards") then
+ESPLibrary:RemoveESP(OldDoor:FindFirstChild("CrossBoards"))
+end
 end
 
 local OldDoor = workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1].Door.Door
 if OldDoor then
 ESPLibrary:RemoveESP(OldDoor)
+if OldDoor:FindFirstChild("CrossBoards") then
+ESPLibrary:RemoveESP(OldDoor:FindFirstChild("CrossBoards"))
+end
+
 end
 
 local Doo = workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1].Door.Door
+if Doo:FindFirstChild("CrossBoards") then
+AddESP(Doo.CrossBoards, "",  DoorColor)
+AddESP(workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")].Door.Door.CrossBoards, "", DoorColor) 
+end
+
 AddESP(Doo, "Door " .. Doo.Parent:GetAttribute("RoomID"), DoorColor)
 AddESP(workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")].Door.Door, "Door " .. workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")].Door:GetAttribute("RoomID"), DoorColor) 
 end
@@ -4249,7 +4332,7 @@ end
 
 BypassBox:AddToggle('InfItems',{
 Text = "Infinite Items ",
-Disabled = Floor.Value == "Fools" and RemotesFolder.Name == "Bricks" and true or false,
+Disabled = Floor.Value == "Fools" and RemotesFolder.Name == "Bricks" and not Firepp and true or false,
 Callback = function(Value)
 if Value then
 for _, v in pairs(workspace.CurrentRooms:GetDescendants()) do
@@ -4302,8 +4385,9 @@ local PlayerESP = 0
 local NoclipDelay = 0
 local DoorReach = 0
 local NoFogDelay = 0
+local ShowPathDelay = 0
 table.insert(Connections,RunService.RenderStepped:Connect(function(dt)
-
+ShowPathDelay += dt
 AutoInteract += dt
 NotifyCode += dt
 AutoAnchorSolver += dt
@@ -4328,20 +4412,50 @@ end
 
 end
 
+
 if Char:GetAttribute("FakeRevived") then
-Char.Humanoid:SetStateEnabled("Dead", false)
-Char.Humanoid.Sit = false
-if Char:FindFirstChild("HumanoidRootPart") then
-Char.HumanoidRootPart.Anchored = false
-end
-if LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Death") then
-LocalPlayer.PlayerGui.MainUI.Initiator.Death:Destroy()
-end
+
+	
+	if Char.Humanoid.BreakJointsOnDeath ~= false then
+		Char.Humanoid.BreakJointsOnDeath = false
+	end
+	
+	if Char.Humanoid.RequiresNeck ~= false then
+		Char.Humanoid.RequiresNeck = false
+	end
+
+	if Char.Humanoid.PlatformStand ~= false then
+		Char.Humanoid.PlatformStand = false
+	end
+
+	if Char.Humanoid.Health <= 0 then
+		Char.Humanoid.Health = 0.1
+	end
+
+	Char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+	
+	Char.Humanoid.Sit = false
+	
+	if Char:FindFirstChild("HumanoidRootPart") then
+		Char.HumanoidRootPart.Anchored = false
+	end
+
+	if Char:FindFirstChild("CollisionPart") and Char.CollisionPart.Anchored ~= false then
+		Char.CollisionPart.Anchored = false
+	end
+	
+	if LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Death") then
+		LocalPlayer.PlayerGui.MainUI.Initiator.Death:Destroy()
+	end
+
+	game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
 
 
 Char.Humanoid.AutomaticScalingEnabled = true
 Char:SetAttribute("Stunned", false)
 LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Enabled = not LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Enabled
+
+
 end
 
 end
@@ -4433,7 +4547,7 @@ if Toggles.Freecam.Value then
     end
 
     local fcPart = workspace:FindFirstChild("FreecamPart")
-    local curCam = workspace.CurrentCamera
+    local curCam = Camera
     
     if fcPart and curCam then
         local delta = UserInputService:GetMouseDelta()
@@ -4469,19 +4583,27 @@ end
 
 
 
+
+
+
 if Toggles.DeleteFigureFE.Value and Figures then
     for _, v in pairs(Figures) do
         local Root = v:FindFirstChild("Root")
-        
+       if not IsNetworkOwner then
+Notify("Sorry your executor wont support Delete Figure Because isnetworkowner", 5)
+Toggles.DeleteFigureFE:SetValue(false)
+end 
         if Root and isnetworkowner(Root) then
-            v:PivotTo(CFrame.new(0, -4999, 0))
-            
+            local bf = Instance.new("BodyForce")
+            bf.Force = Vector3.new(0, -1000, 0)
+            bf.Parent = Root
+
             for _, part in pairs(v:GetDescendants()) do
                 if part:IsA("BasePart") and part.CanCollide then
                     part.CanCollide = false
                 end
             end
-            
+
             if Root.Position.Y < -1000 and not v:GetAttribute("Deleted") then
                 Notify("[Delete Figure] Successfully Removed Figure", 4)
                 v:SetAttribute("Deleted", true)
@@ -4495,9 +4617,7 @@ end
 
 
 
-
-
-if Toggles.AutoAnchorSolver.Value and LatestRoom.Value == 50 and AutoAnchorSolver > 0.3 then
+if Toggles.AutoAnchorSolver.Value and LatestRoom.Value == 50 and AutoAnchorSolver > 0.5  then
     
 AutoAnchorSolver = 0
 local Hint = LocalPlayer.PlayerGui.MainUI:FindFirstChild("AnchorHintFrame")
@@ -4537,47 +4657,6 @@ end
 
 
 
-if Toggles.ShowPath.Value and Paths then
-    for i = #Paths, 1, -1 do
-        local v = Paths[i]
-        local a0 = Instance.new("Attachment")
-        a0.Name = "PathAttach"
-        a0.Parent = v
-game:GetService("Debris"):AddItem(a0, 60)
-
-        local beam = Instance.new("Beam")
-        beam.Name = "PathBeam"
-        beam.Attachment0 = a0
-        beam.FaceCamera = true
-        beam.Width0, beam.Width1 = 1, 1
-beam.Color = ColorSequence.new(Color3.new(0, 1, 0))
-
-        beam.Parent = v
-game:GetService("Debris"):AddItem(beam, 60)
-        local closestPart = nil
-        local shortestDist = math.huge
-
-        for _, target in pairs(Paths) do
-            if v ~= target then
-                local dist = (v.Position - target.Position).Magnitude
-                if dist < shortestDist then
-                    shortestDist = dist
-                    closestPart = target
-                end
-            end
-        end
-
-        if closestPart then
-            local a1 = closestPart:FindFirstChild("PathAttach") or Instance.new("Attachment")
-            a1.Name = "PathAttach"
-            a1.Parent = closestPart
-            beam.Attachment1 = a1
-game:GetService("Debris"):AddItem(a1, 60)
-        end
-        
-        table.remove(Paths, i)
-    end
-end
 
 
 
@@ -4593,35 +4672,38 @@ end
 
 
 
-
-
---[[
 if Toggles.AutoMinecart.Value and Camera:FindFirstChild("MinecartRig") then
     if LatestRoom.Value < 49 then
         if not LocalPlayer:GetAttribute("NotifyMinecart") then
-            Notify("[Auto Minecart] Please dont do anything while Auto Minecart Enabled", 5)
+            Notify("[Auto Minecart] DONT MOVE", 5)
             LocalPlayer:SetAttribute("NotifyMinecart", true)
         end
-        local RootPart = LocalPlayer.Character.HumanoidRootPart
+
+        local Root = LocalPlayer.Character.HumanoidRootPart
         local ClosestDuckDist = math.huge
+        
         for _, v in pairs(DuckBoards) do
-            local Dist = (RootPart.Position - v:GetPivot().Position).Magnitude
+            local Dist = (Root.Position - v:GetPivot().Position).Magnitude
             if Dist < ClosestDuckDist then
                 ClosestDuckDist = Dist
             end
         end
+
         if RequiredMainGame.crouching ~= (ClosestDuckDist < 30) then
             RequiredMainGame.crouching = (ClosestDuckDist < 30)
         end
+
         local CurrentNode = nil
         local MinDist = math.huge
         for _, Node in pairs(Nodes) do
-            local Dist = (RootPart.Position - Node.Position).Magnitude
+            if Node:GetAttribute("ForceConnect") then
+            local Dist = (Root.Position - Node.Position).Magnitude
             if Dist < MinDist then
                 MinDist = Dist
                 CurrentNode = Node
             end
         end
+end
         if CurrentNode then
             local CurrentNum = tonumber(string.match(CurrentNode.Name, "%d+"))
             if CurrentNum then
@@ -4632,25 +4714,29 @@ if Toggles.AutoMinecart.Value and Camera:FindFirstChild("MinecartRig") then
                         break
                     end
                 end
+
                 if Node1 then
-                    local dot = (Node1.Position - CurrentNode.Position).Unit:Dot(RootPart.CFrame.RightVector)
-local Dis = (LocalPlayer.Character.HumanoidRootPart.Position - Node1.Position).Magnitude
-if Dis < 30 then
-                    require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
-                        if dot > 0.15 then
-                            return Vector3.new(1, 0, 0)
-                        elseif dot < -0.15 then
-                            return Vector3.new(-1, 0, 0)
+                    local DistToNode = (Root.Position - Node1.Position).Magnitude
+                    
+                    if DistToNode < 30 then
+                        local DirectionToNode = (CurrentNode.Position - Node1.Position).Unit
+                        local Dot = DirectionToNode:Dot(Root.CFrame.RightVector)
+
+                        require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
+                            if Dot > 0.07 then
+                                return Vector3.new(1, 0, 0)
+                            elseif Dot < -0.07  then
+                                return Vector3.new(-1, 0, 0)
+                            end
+                            return Vector3.new(0, 0, -1)
                         end
-                        return Vector3.new(0, 0, -1)
                     end
                 end
             end
-          end
         end
     elseif LatestRoom.Value >= 50 then
         if LocalPlayer:GetAttribute("NotifyMinecart") then
-            Notify("[Auto Minecart] you can control now", 5)
+            Notify("[Auto Minecart] YOU CAN MOVE", 5)
             LocalPlayer:SetAttribute("NotifyMinecart", false)
         end
         Toggles.AutoMinecart:SetValue(false)
@@ -4658,27 +4744,73 @@ if Dis < 30 then
     end
 end
 
-]]
-
---[[
-if Toggles.MinecartTP.Value then
 
 
 
- if LatestRoom.Value < 49 and  Camera:FindFirstChild("MinecartRig") then
 
-RemotesFolder.MinecartPos:FireServer(
-workspace.CurrentRooms[LatestRoom.Value].Door:GetPivot()
-)
-Camera.MinecartRig.Root.CFrame = workspace.CurrentRooms[LatestRoom.Value].Door.Door.CFrame
+
+
+
+
+
+
+
+if Toggles.ShowPath.Value and Paths and ShowPathDelay > 1 then
+ShowPathDelay = 0
+  
+    for i = #Paths, 1, -1 do
+        local v = Paths[i]
+        
+        local a0 = v:FindFirstChild("PathAttach")
+        if not a0 then
+            a0 = Instance.new("Attachment")
+            a0.Name = "PathAttach"
+            a0.Parent = v
+        end
+
+        local beam = v:FindFirstChild("PathBeam")
+        if not beam then
+            beam = Instance.new("Beam")
+            beam.Name = "PathBeam"
+            beam.FaceCamera = true
+            beam.Width0, beam.Width1 = 1, 1
+            beam.Color = ColorSequence.new(Color3.new(0, 1, 0))
+            beam.Parent = v
+        end
+
+        local closestPart = nil
+        local shortestDist = math.huge
+        for j = 1, #Paths do
+            local target = Paths[j]
+            if v ~= target and target:IsA("BasePart") then
+                local dist = (v.Position - target.Position).Magnitude
+                if dist < shortestDist then
+                    shortestDist = dist
+                    closestPart = target
+                end
+            end
+        end
+
+        if closestPart then
+            local a1 = closestPart:FindFirstChild("PathAttach")
+            if not a1 then
+                a1 = Instance.new("Attachment")
+                a1.Name = "PathAttach"
+                a1.Parent = closestPart
+            end
+if beam.Attachment0 ~= a0 then
+            beam.Attachment0 = a0
 end
-
+if beam.Attachment1 ~= a1 then
+            beam.Attachment1 = a1
 end
-]]
+if beam.Enabled == false then
+            beam.Enabled = true
+        end
 
-
-
-
+        end
+    end
+end
 
 
 
@@ -4779,8 +4911,8 @@ if Toggles.Godmode.Value then
             LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(0, -2.2, 0)
         end
 
-        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.25 then
-            LocalPlayer.Character.Humanoid.HipHeight = 0.25
+        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.18 then
+            LocalPlayer.Character.Humanoid.HipHeight = 0.18
         end
 
         if LocalPlayer.Character.Collision.Size ~= Vector3.new(1, 1, 3) then
@@ -4856,7 +4988,7 @@ if Toggles.AutoRooms.Value then
 
         if ShouldHide then
             local Closet = GetNearestHidingSpot()
-            if Closet and Closet.HiddenPlayer and Closet.HiddenPlayer.Value == nil then
+            if Closet then
                 Closet.Base.CanCollide = false
                 PathTo(Closet.Base.Position)
                 if not LocalPlayer.Character.CollisionPart.Anchored then
@@ -4913,7 +5045,7 @@ if Toggles.AutoLibraryCode.Value and AutoLibrary > 0.2 then
     if LatestRoom.Value == 50 then
         local Code = GetLibraryCode()
         if Code then
-            if Toggles.BruteForceLibCode.Value and string.find(Code, "x") then
+            if Toggles.BruteForceLibCode.Value and string.find(Code, "_") then
                 local Bruted = ""
                 for i = 1, #Code do
                     local char = string.sub(Code, i, i)
@@ -4994,7 +5126,12 @@ if prompt.Parent.Name == "Mandrake" then continue end
                             if not prompt.Enabled then
                                 prompt.Enabled = true
                             end
+if Firepp then
                             fireproximityprompt(prompt)
+else
+prompt:InputHoldBegin()
+prompt:InputHoldEnd(prompt.HoldDuration or 0)
+end
                         end
                     end
                 end
@@ -5240,10 +5377,10 @@ if HookMeta then
         local Method = getnamecallmethod()
         if Method == "FireServer" or Method == "InvokeServer" then
             if Toggles.AutoHeartbeat.Value and Self.Name == "ClutchHeartbeat" then
-                return true
+                return Old(Self, true)
             end
             if Method == "FireServer" and Toggles.FigureHearing.Value and Self.Name == "Crouch" then
-                return Old(Self, true)
+                return Old(Self, true,true)
             end
         end
         return Old(Self, ...)
@@ -5272,7 +5409,7 @@ table.insert(Connections,workspace.DescendantAdded:Connect(function(v)
 
 
 
-repeat task.wait(0.1) until v.Parent
+
 if v.Parent then
 if v.Parent:FindFirstChildOfClass("Humanoid") then return end
 if  HidingPlaces[v.Name] then
@@ -5361,6 +5498,23 @@ if v.Name == "LiveBreakerPolePickup" then
 AddESP(v, "Breaker",BreakerColor)
 
 end
+
+end
+
+if Toggles.AutoMinecart.Value then
+
+
+
+
+if v.Name == "DuckBoard" then
+table.insert(DuckBoards, v)
+end
+
+
+if string.find(v.Name, "MinecartNode") then
+table.insert(Nodes, v)
+end
+
 
 end
 
@@ -5649,6 +5803,10 @@ Callback = function(Value)
 PlaySound = Value
 end
 })
+
+
+
+
 MenuGroup:AddDropdown("NotificationSide", {
 	Values = { "Left", "Right" },
 	Default = "Right",
@@ -5661,7 +5819,7 @@ MenuGroup:AddDropdown("NotificationSide", {
 })
 
 MenuGroup:AddDropdown("NotifyWay", {
-	Values = { "Doors", "Library"},
+	Values = { "Doors", "Library", "Supreme"},
 	Default = Notifying,
 
 	Text = "Notification  Library",
@@ -5704,6 +5862,8 @@ MenuGroup:AddDropdown("DPIDropdown", {
 })
 UtilityBox:AddLabel('TheHunterSolo1 - Owner & Main Coder',true)
 
+UtilityBox:AddLabel('nahhthatscrazy - Method 1 Speed Bypass',true)
+
 
 -- Sets the draggable label visibility
 
@@ -5734,6 +5894,18 @@ FakeScreech:Destroy()
 if ReplicatedStorage:FindFirstChild("Screech") then 
 ReplicatedStorage:FindFirstChild("Screech").Parent = RemotesFolder
 end
+
+
+local getcons = getconnections or get_signal_cons or get_relative_connections
+
+if getcons then
+    for _, con in pairs(getcons(LocalPlayer.Idled)) do
+        if con.Enable then 
+            con:Enable() 
+        end
+    end
+end
+
 
 
 
