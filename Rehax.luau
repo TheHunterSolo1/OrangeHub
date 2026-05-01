@@ -10,6 +10,7 @@ local Lighting = game:GetService("Lighting")
 local UserInputService = game:GetService("UserInputService")
 local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage") 
+local Debris = game:GetService("Debris")
 local ExecutorSupport = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/refs/heads/main/ExecutorTest"))()
 
 local ProximityPromptService = game:GetService("ProximityPromptService")
@@ -1445,8 +1446,9 @@ PathFolder.Name = "PathFolder"
 
 
 
-
 function PathTo(Pos)
+
+
 	local Character = LocalPlayer.Character
 	local Root = Character and Character:FindFirstChild("HumanoidRootPart")
 	local Humanoid = Character and Character:FindFirstChild("Humanoid")
@@ -1456,13 +1458,13 @@ function PathTo(Pos)
 		local p = PathfindingService:CreatePath({
 			AgentRadius = 2,
 			AgentHeight = 5,
-			AgentCanJump = false,
-			WaypointSpacing = 5,
+			AgentCanJump = true,
+			WaypointSpacing = 4,
 			AgentCanSprint = false,
 			AgentMaxSlope = 45,
 			AgentJumpHeight = 0
 		})
-local AdjustedPos = Pos + Vector3.new(0, 0, 1)
+local AdjustedPos = Pos and Pos +Vector3.new(0, 0, 1)
 
 			p:ComputeAsync(Root.Position, AdjustedPos)
 
@@ -1471,11 +1473,33 @@ local AdjustedPos = Pos + Vector3.new(0, 0, 1)
 		
 		
 		for _, waypoint in ipairs(p:GetWaypoints()) do
+if not Toggles.AutoRooms.Value or Library.Unloaded then break end
+
+
+
+
+
+
+
+
+ 
 			local Dist = (Root.Position - waypoint.Position).Magnitude
-			if Dist > 5 then
+if Dist >= 4 then
 				Humanoid:MoveTo(waypoint.Position)
+
+
+
 				Humanoid.MoveToFinished:Wait()
-			end
+
+
+
+
+
+
+
+		
+
+end
 		end
 end
 
@@ -1593,11 +1617,16 @@ SeekPath.Name = "SeekPath"
 
 
 
-local Paths = {}
+
 function ShowSeekPath(v)
+local Part = Instancw.new("Part", SeekPath)
+Part.Size = Vector3.new(1, 1, 1)
+Part.Anchored = true
+Part.Position = v.Position + Vector3.new(0, 2, 0)
+Part.CanCollide = false
+Part.Color = Color3.new(0, 1, 0)
+Debris:AddItem(Part, 60)
 
-
-table.insert(Paths,v)
 
 end
 
@@ -2006,13 +2035,8 @@ ShowSeekPath(v)
 end
 end
 else
-for _, v in pairs(workspace.CurrentRooms:GetDescendants()) do
-if v.Name == "PathAttach" or v.Name == "PathBeam" then
-v:Destroy()
+SeekPath:ClearAllChildren()
 
-
-end
-end
 
 end
 end
@@ -2047,8 +2071,9 @@ local Control = require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().Ge
 end
 MinesFloor:AddToggle('AutoMinecart',{
 Text = "Auto Minecart",
+Risky = true,
 Default = false,
-Visible = false,
+
 Disabled =  Floor.Value ~= "Mines" and true or false,
 Callback = function(Value)
 if Value then
@@ -2107,6 +2132,7 @@ end
 
 
 
+
 RoomsFloor:AddToggle('AutoRooms',{
 Text = "Auto A-1000",
 Disabled = Floor.Value ~= "Rooms" and true or false,
@@ -2124,6 +2150,9 @@ PathActive = false
 end
 
 end
+
+
+
 
 end
 })
@@ -2179,14 +2208,7 @@ end
 })
 
 
-ESPSettings:AddToggle('ShowArrows',{
-Text = "Show ESP Arrows",
-Default = true,
-Visible = false,
-Callback = function(Value)
-ESPLibrary:SetArrows(Value)
-end
-})
+
 
 ESPSettings:AddToggle('ShowRainbow',{
 Text = "Show ESP Rainbow",
@@ -3708,8 +3730,12 @@ task.spawn(function()
 do
         if Library.Unloaded then break end
 if Options.SpeedBypassMethod.Value == "Method 1" then
+if Toggles.BypassSpeed.Value then
+if CollisionClone then
 CollisionClone.Massless = true
+end
 RemotesFolder.Crouch:FireServer(true, true)
+end
 elseif  Options.SpeedBypassMethod.Value == "Method 2" then
 
 
@@ -3757,6 +3783,9 @@ end)
 
 
 table.insert(Connections,workspace.ChildAdded:Connect(function(v)
+
+
+
 if Toggles.AntiBanana.Value then
 if v.Name == "BananaPeel" then
 v.CanTouch = false
@@ -3823,9 +3852,11 @@ AddEntityESP(v, "Ambush", EntityColor)
 end
 if  v.Name == "A60"  then
 AddEntityESP(v, "A-60", EntityColor)
+IsMoving = false
 end
 if v.Name == "A120"  then
 AddEntityESP(v, "A-120", EntityColor)
+IsMoving = false
 end
 if v.Name == "GlitchRush"  then
 AddEntityESP(v, "Glitch Rush", EntityColor)
@@ -4065,6 +4096,35 @@ end
 
 end
 })
+
+
+
+
+ReachBox:AddToggle('PromptClip',{
+Text = "Prompt Clip",
+Default = false,
+Callback = function(Value)
+if Value then
+for _, v in pairs(workspace:GetDescendants()) do
+if v:IsA("ProximityPrompt") then
+v:SetAttribute("Clip", v.RequiresLineOfSight)
+v.RequiresLineOfSight = false
+end
+end
+
+else
+
+for _, v in pairs(workspace:GetDescendants()) do
+if v:IsA("ProximityPrompt") then
+v.RequiresLineOfSight = v:GetAttribute("Clip") or true 
+end
+end
+end
+
+
+end
+})
+
 ReachBox:AddToggle('DoorReach',{
 Text = "Door Reach",
 Default = false
@@ -4382,21 +4442,20 @@ local AutoAnchorSolver  = 0
 local NotifyCode = 0
 local InfItemsDelay = 0
 local PlayerESP = 0
-local NoclipDelay = 0
 local DoorReach = 0
-local NoFogDelay = 0
-local ShowPathDelay = 0
+
+
 table.insert(Connections,RunService.RenderStepped:Connect(function(dt)
-ShowPathDelay += dt
+
 AutoInteract += dt
 NotifyCode += dt
 AutoAnchorSolver += dt
 InfItemsDelay += dt
 PlayerESP += dt
-NoclipDelay += dt
+
 AutoLibrary += dt
 DoorReach += dt
-NoFogDelay += dt
+
 
 if Toggles.FakeRevive.Value then
 local Char = LocalPlayer.Character
@@ -4565,7 +4624,7 @@ if Toggles.Freecam.Value then
         curCam.Focus = curCam.CFrame * CFrame.new(0, 0, -10)
 
         if hum and hum.MoveDirection.Magnitude > 0 then
-            local speed = 50
+            local speed = 75
             local moveVec = hum.MoveDirection
             local localMove = curCam.CFrame:VectorToObjectSpace(moveVec)
             local finalMove = (curCam.CFrame.RightVector * localMove.X) + (curCam.CFrame.LookVector * -localMove.Z)
@@ -4595,7 +4654,7 @@ Toggles.DeleteFigureFE:SetValue(false)
 end 
         if Root and isnetworkowner(Root) then
             local bf = Instance.new("BodyForce")
-            bf.Force = Vector3.new(0, -1000, 0)
+            bf.Force = Vector3.new(0, -100, 0)
             bf.Parent = Root
 
             for _, part in pairs(v:GetDescendants()) do
@@ -4718,15 +4777,20 @@ end
                 if Node1 then
                     local DistToNode = (Root.Position - Node1.Position).Magnitude
                     
-                    if DistToNode < 30 then
+                    if DistToNode > 30 then
+require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
+return Vector3.new(0, 0, -1)
+end
+
+else
                         local DirectionToNode = (CurrentNode.Position - Node1.Position).Unit
-                        local Dot = DirectionToNode:Dot(Root.CFrame.RightVector)
+                        local Dot = DirectionToNode:Dot(CurrentNode.CFrame.RightVector)
 
                         require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
                             if Dot > 0.07 then
                                 return Vector3.new(1, 0, 0)
                             elseif Dot < -0.07  then
-                                return Vector3.new(-1, 0, 0)
+                                return Vector3.new(1, 0, 0)
                             end
                             return Vector3.new(0, 0, -1)
                         end
@@ -4755,62 +4819,7 @@ end
 
 
 
-if Toggles.ShowPath.Value and Paths and ShowPathDelay > 1 then
-ShowPathDelay = 0
-  
-    for i = #Paths, 1, -1 do
-        local v = Paths[i]
-        
-        local a0 = v:FindFirstChild("PathAttach")
-        if not a0 then
-            a0 = Instance.new("Attachment")
-            a0.Name = "PathAttach"
-            a0.Parent = v
-        end
 
-        local beam = v:FindFirstChild("PathBeam")
-        if not beam then
-            beam = Instance.new("Beam")
-            beam.Name = "PathBeam"
-            beam.FaceCamera = true
-            beam.Width0, beam.Width1 = 1, 1
-            beam.Color = ColorSequence.new(Color3.new(0, 1, 0))
-            beam.Parent = v
-        end
-
-        local closestPart = nil
-        local shortestDist = math.huge
-        for j = 1, #Paths do
-            local target = Paths[j]
-            if v ~= target and target:IsA("BasePart") then
-                local dist = (v.Position - target.Position).Magnitude
-                if dist < shortestDist then
-                    shortestDist = dist
-                    closestPart = target
-                end
-            end
-        end
-
-        if closestPart then
-            local a1 = closestPart:FindFirstChild("PathAttach")
-            if not a1 then
-                a1 = Instance.new("Attachment")
-                a1.Name = "PathAttach"
-                a1.Parent = closestPart
-            end
-if beam.Attachment0 ~= a0 then
-            beam.Attachment0 = a0
-end
-if beam.Attachment1 ~= a1 then
-            beam.Attachment1 = a1
-end
-if beam.Enabled == false then
-            beam.Enabled = true
-        end
-
-        end
-    end
-end
 
 
 
@@ -4964,48 +4973,7 @@ end
 
 
     
-if Toggles.AutoRooms.Value then
-        
-        if Toggles.IgnoreA60.Value and not Toggles.Godmode.Value then
-            Toggles.Godmode:SetValue(true)
-            Notify("Godmode Enabled Automatically For Ignore A-60", 5)
-        end
 
-        LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 3)
-
-        local DangerousEntity = workspace:FindFirstChild("A120") or workspace:FindFirstChild("GlitchRush") or workspace:FindFirstChild("GlitchAmbush")
-        local A60 = workspace:FindFirstChild("A60")
-        
-        local ShouldHide = false
-
-        if DangerousEntity and DangerousEntity.PrimaryPart and DangerousEntity.PrimaryPart.Position.Y > -4 then
-            ShouldHide = true
-        elseif A60 and A60.PrimaryPart and A60.PrimaryPart.Position.Y > -4 then
-            if not Toggles.IgnoreA60.Value then
-                ShouldHide = true
-            end
-        end
-
-        if ShouldHide then
-            local Closet = GetNearestHidingSpot()
-            if Closet then
-                Closet.Base.CanCollide = false
-                PathTo(Closet.Base.Position)
-                if not LocalPlayer.Character.CollisionPart.Anchored then
-                    fireproximityprompt(Closet.HidePrompt)
-                end
-            end
-        else
-            LocalPlayer.Character:SetAttribute("Hiding", false)
-            local CurrentRoom = workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
-            if CurrentRoom then
-                local TargetDoor = CurrentRoom:FindFirstChild("Door")
-                if TargetDoor and TargetDoor:FindFirstChild("Door") then
-                    PathTo(TargetDoor.Door.Position)
-                end
-            end
-        end
-    end
 
 
 
@@ -5143,8 +5111,8 @@ end
 
 
 
-if Toggles.NoFog.Value and NoFogDelay > 0.5 then
-NoFogDelay = 0
+if Toggles.NoFog.Value then
+ 
 if Lighting.FogEnd < 100000 then
 Lighting.FogEnd = 100000
 end
@@ -5306,8 +5274,7 @@ end
 
 
 
-if Toggles.NoClip.Value and NoclipDelay > 0.2 then
-NoclipDelay = 0
+if Toggles.NoClip.Value then
     for _, v in ipairs(LocalPlayer.Character:GetChildren()) do
         if v:IsA("BasePart") and v.Name ~= "CollisionClone" and v.CanCollide then
             v.CanCollide = false
@@ -5321,8 +5288,7 @@ NoclipDelay = 0
     end
 end
 
-if not Toggles.NoClip.Value and NoclipDelay > 0.2 then
-NoclipDelay = 0
+if not Toggles.NoClip.Value then
 for _, v in pairs(LocalPlayer.Character:GetChildren()) do
 if not (v.Name == "CollisionClone" or v.Name == "Collision") then
 if v:IsA("BasePart") and not v.CanCollide then
@@ -5356,7 +5322,52 @@ end))
 
 
 
+table.insert(Connections, RunService.Heartbeat:Connect(function()
 
+if Toggles.AutoRooms.Value then
+        if IsMoving then return end
+        if Toggles.IgnoreA60.Value and not Toggles.Godmode.Value then
+            Toggles.Godmode:SetValue(true)
+            Notify("Godmode Enabled Automatically For Ignore A-60", 5)
+        end
+
+        LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 3)
+
+        local DangerousEntity = workspace:FindFirstChild("A120") or workspace:FindFirstChild("GlitchRush") or workspace:FindFirstChild("GlitchAmbush")
+        local A60 = workspace:FindFirstChild("A60")
+        
+        local ShouldHide = false
+
+        if DangerousEntity and DangerousEntity.PrimaryPart and DangerousEntity.PrimaryPart.Position.Y > -4 then
+            ShouldHide = true
+        elseif A60 and A60.PrimaryPart and A60.PrimaryPart.Position.Y > -4 then
+            if not Toggles.IgnoreA60.Value then
+                ShouldHide = true
+            end
+        end
+
+        if ShouldHide then
+            local Closet = GetNearestHidingSpot()
+            if Closet then
+                Closet.Base.CanCollide = false
+                PathTo(Closet.Base.Position)
+                if not LocalPlayer.Character.CollisionPart.Anchored then
+                    fireproximityprompt(Closet.HidePrompt)
+                end
+            end
+        else
+            LocalPlayer.Character:SetAttribute("Hiding", false)
+            local CurrentRoom = workspace.CurrentRooms:FindFirstChild(tostring(LatestRoom.Value))
+            if CurrentRoom then
+                local TargetDoor = CurrentRoom:FindFirstChild("Door")
+                if TargetDoor and TargetDoor:FindFirstChild("Door") then
+                    PathTo(TargetDoor.Door.Position)
+                end
+            end
+        end
+    end
+
+end))
 
 table.insert(Connections, LatestRoom:GetPropertyChangedSignal("Value"):Connect(function()
 if LocalPlayer.Character:GetAttribute("FakeRevived") then
@@ -5365,6 +5376,9 @@ task.wait(0.3)
 LocalPlayer:SetAttribute("CurrentRoom", tonumber(LatestRoom.Value))
 
 end
+
+IsMoving = false
+
 end))
 
 if HookMeta then
@@ -5409,7 +5423,8 @@ table.insert(Connections,workspace.DescendantAdded:Connect(function(v)
 
 
 
-
+local timeout = 0
+repeat task.wait(0.1) timeout += task.wait(0.1) until timeout >= 1 or v.Parent
 if v.Parent then
 if v.Parent:FindFirstChildOfClass("Humanoid") then return end
 if  HidingPlaces[v.Name] then
@@ -5441,6 +5456,14 @@ if Names[v.Parent.Name] or v.Name == "FusesPrompt" or v.Parent.Parent.Name == "L
 table.insert(Stored, v)
 
 end
+end
+
+
+end
+
+if Toggles.ShowPath.Value then
+if v.Name == "SeekGuidingLight" then
+ShowSeekPath(v)
 end
 
 
@@ -5543,6 +5566,14 @@ end
 end
 
 
+if Toggles.PromptClip.Value then
+
+if v:IsA("ProximityPrompt") then
+v:SetAttribute("Clip", v.RequiresLineOfSight)
+v.RequiresLineOfSight = false
+end
+
+end
 
 
 
@@ -5846,6 +5877,18 @@ Notify('Please Unload Script and Execute Again to Take Effect',4)
 	end,
 })
 
+
+MenuGroup:AddDropdown("RenderESPSpeed", {
+	Values = { "10", "30", "60", "90", "120","144", "240"},
+	Default = Library.IsMobile and 2 or 6,
+
+	Text = "ESP Rendering Speed",
+
+	Callback = function(Value)
+ESPLibrary:SetRenderingSpeed(Value)
+	end,
+})
+
 MenuGroup:AddDivider()
 MenuGroup:AddDropdown("DPIDropdown", {
 	Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
@@ -6043,6 +6086,15 @@ if CollisionClone then
 CollisionClone:Destroy()
 CollisionClone = nil
 end
+
+
+
+for _, v in pairs(workspace:GetDescendants()) do
+if v:IsA("ProximityPrompt") then
+v.RequiresLineOfSight = v:GetAttribute("Clip") or true 
+end
+end
+
 
 if PathFolder then
 PathFolder:Destroy()
