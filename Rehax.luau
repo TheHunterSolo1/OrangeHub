@@ -856,7 +856,7 @@ if ReplicatedStorage:FindFirstChild("EntityInfo") or ReplicatedStorage:FindFirst
 repeat task.wait() until LocalPlayer.Character 
 
 if  getgenv().ScriptLibrary ~= "Obsidian" or getgenv().ScriptLibrary ~= "Linoria" then
-getgenv().ScriptLibrary = getgenv().ScriptLibrary or "Obsidian"
+getgenv().ScriptLibrary = getgenv().ScriptLibrary or "Linoria"
 end
 
 local repo = getgenv().ScriptLibrary == "Obsidian" and 'https://raw.githubusercontent.com/mstudio45/Obsidian/main/' or getgenv().ScriptLibrary == "Linoria" and 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
