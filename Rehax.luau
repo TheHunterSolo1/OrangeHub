@@ -271,7 +271,7 @@ Callback = function(Value)
 ESPLibrary:SetShowDistance(Value)
 end
 })
-ESPSettings:AddToggle('ShowMarker',{
+ESPSettings:AddToggle('ShowTracers',{
 Text = "Show ESP Tracers",
 Default = false,
 Tooltip = "Show you a (3d) line that connects from you to the objective",
@@ -1619,10 +1619,11 @@ SeekPath.Name = "SeekPath"
 
 
 function ShowSeekPath(v)
-local Part = Instancw.new("Part", SeekPath)
+local Part = Instance.new("Part", SeekPath)
 Part.Size = Vector3.new(1, 1, 1)
 Part.Anchored = true
-Part.Position = v.Position + Vector3.new(0, 2, 0)
+Part.Shape = "Ball"
+Part.Position = v.Position 
 Part.CanCollide = false
 Part.Color = Color3.new(0, 1, 0)
 Debris:AddItem(Part, 60)
@@ -4072,6 +4073,34 @@ end
 end
 })
 
+
+BypassEntityBox:AddToggle('AntiLag',{
+Text = "Anti Lag ",
+Default = false,
+Callback = function(Value)
+if Value then
+for _, v in workspace.CurrentRooms:GetDescendants() do
+if v:IsA("BasePart") then
+v:SetAttribute("Mat", v.Material)
+v.Material = "Plastic"
+end
+end
+else
+
+for _, v in workspace.CurrentRooms:GetDescendants() do
+if v:IsA("BasePart") then
+if v:GetAttribute("Mat") then
+v.Material = v:GetAttribute("Mat") or "Plastic"
+end
+end
+end
+
+
+end
+end
+})
+BypassEntityBox:AddLabel('Anti Lag if it Lags you Turn it off',true)
+
 ReachBox:AddToggle('PromptReach',{
 Text = "Prompt Reach",
 Default = false,
@@ -4311,15 +4340,7 @@ local function InfPrompt(Prompt)
             Clone.Parent = Prompt.Parent
             Clone.Enabled = true
             Clone.ClickablePrompt = true
-task.spawn(function()
-while task.wait(0.05) do
-if not Prompt or Prompt:GetAttribute("Interactions") and Prompt:GetAttribute("Interactions") > 1 then break end
-if not Clone.Enabled then
-Clone.Enabled = true
-end
 
-end
-end)
             local Con
             Con = Clone.Triggered:Connect(function()
                 Con:Disconnect()
@@ -4653,18 +4674,21 @@ Notify("Sorry your executor wont support Delete Figure Because isnetworkowner", 
 Toggles.DeleteFigureFE:SetValue(false)
 end 
         if Root and isnetworkowner(Root) then
-            local bf = Instance.new("BodyForce")
-            bf.Force = Vector3.new(0, -100, 0)
-            bf.Parent = Root
+if RemotesFolder.Name == "RemotesFolder" then
+            v.Root.Size = Vector3.new(10, 2040, 10)
+else
+v.Root.CFrame = CFrame.new(0, -50000, 0)
+end
 
             for _, part in pairs(v:GetDescendants()) do
                 if part:IsA("BasePart") and part.CanCollide then
                     part.CanCollide = false
+                    part.Anchored = false
                 end
             end
 
             if Root.Position.Y < -1000 and not v:GetAttribute("Deleted") then
-                Notify("[Delete Figure] Successfully Removed Figure", 4)
+                Notify("Deleted Figure Successfully", 4)
                 v:SetAttribute("Deleted", true)
             end
         end
@@ -4768,14 +4792,14 @@ end
             if CurrentNum then
                 local Node1
                 for _, Node in pairs(Nodes) do
-                    if Node.Name == "MinecartNode" .. tostring(CurrentNum + 1) then
+                    if Node.Name == "MinecartNode" .. tostring(CurrentNum + 3) then
                         Node1 = Node
                         break
                     end
                 end
 
                 if Node1 then
-                    local DistToNode = (Root.Position - Node1.Position).Magnitude
+                    local DistToNode = (Root.Position - CurrentNode.Position).Magnitude
                     
                     if DistToNode > 30 then
 require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
@@ -4784,12 +4808,12 @@ end
 
 else
                         local DirectionToNode = (CurrentNode.Position - Node1.Position).Unit
-                        local Dot = DirectionToNode:Dot(CurrentNode.CFrame.RightVector)
+                        local Dot = DirectionToNode:Dot(Root.CFrame.RightVector)
 
                         require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
-                            if Dot > 0.07 then
+                            if Dot > 0.1 then
                                 return Vector3.new(1, 0, 0)
-                            elseif Dot < -0.07  then
+                            elseif Dot < -0.1  then
                                 return Vector3.new(1, 0, 0)
                             end
                             return Vector3.new(0, 0, -1)
@@ -4916,20 +4940,20 @@ if Toggles.Godmode.Value then
             Toggles.FigureHearing:SetValue(true)
         end
 
-        if LocalPlayer.Character.LowerTorso.Root.C1 ~= CFrame.new(0, -2.2, 0) then
-            LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(0, -2.2, 0)
+        if LocalPlayer.Character.LowerTorso.Root.C1 ~= CFrame.new(0, -2.3, 0) then
+            LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(0, -2.3, 0)
         end
 
-        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.18 then
-            LocalPlayer.Character.Humanoid.HipHeight = 0.18
+        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.15 then
+            LocalPlayer.Character.Humanoid.HipHeight = 0.15
         end
 
-        if LocalPlayer.Character.Collision.Size ~= Vector3.new(1, 1, 3) then
-            LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 3) 
+        if LocalPlayer.Character.Collision.Size ~= Vector3.new(1, 1, 1) then
+            LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 1) 
         end
 
-        if LocalPlayer.Character.Collision.CollisionCrouch.Size ~= Vector3.new(1, 1, 3) then
-            LocalPlayer.Character.Collision.CollisionCrouch.Size = Vector3.new(1, 1, 3)
+        if LocalPlayer.Character.Collision.CollisionCrouch.Size ~= Vector3.new(1, 1, 1) then
+            LocalPlayer.Character.Collision.CollisionCrouch.Size = Vector3.new(1, 1, 1)
         end
     end
 
@@ -5008,8 +5032,8 @@ end
 
 
 
-if Toggles.AutoLibraryCode.Value and AutoLibrary > 0.2 then
-    AutoLibrary = 0
+if Toggles.AutoLibraryCode.Value then
+  
     if LatestRoom.Value == 50 then
         local Code = GetLibraryCode()
         if Code then
@@ -5028,7 +5052,7 @@ end
 
 
 
-if Toggles.DoorReach.Value and DoorReach > 0.3 then
+if Toggles.DoorReach.Value and DoorReach > 0.1 then
 DoorReach = 0
 local Door = workspace.CurrentRooms[LatestRoom.Value].Door
 if Door.Parent and Door.Parent.Name ~= "101" then
@@ -5072,7 +5096,7 @@ if Toggles.AutoInteract.Value then
 
         if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
 
-        for _, prompt in Interactions do
+        for i,  prompt in Interactions do
             if not prompt.Parent then continue end
 
             if (prompt.Parent.Name == "GoldPile" and Floor.Value == "Fools") or prompt.Parent.Name == "KeyObtainFake" then
@@ -5084,7 +5108,10 @@ if Toggles.AutoInteract.Value then
             end
  if prompt:GetAttribute("InfItems")  and prompt.Name ~= "InfPrompt" then continue end
 if prompt.Parent.Name == "Mandrake" then continue end
-            if not prompt:GetAttribute("Interactions") or prompt:GetAttribute("Interactions") < 1 then
+            if  prompt:GetAttribute("Interactions") and prompt:GetAttribute("Interactions") > 0 then
+
+table.remove(Interactions, i)
+end
                 if prompt.Parent:IsA("BasePart") or prompt.Parent:IsA("Model") then
                     
                     local TargetPart = prompt.Parent:IsA("BasePart") and prompt.Parent or (prompt.Parent.PrimaryPart or prompt.Parent:FindFirstChildWhichIsA("BasePart"))
@@ -5100,13 +5127,14 @@ else
 prompt:InputHoldBegin()
 prompt:InputHoldEnd(prompt.HoldDuration or 0)
 end
+
                         end
                     end
                 end
             end
         end
     end
-end
+
 
 
 
@@ -5422,10 +5450,8 @@ end
 table.insert(Connections,workspace.DescendantAdded:Connect(function(v)
 
 
+task.defer(function()
 
-local timeout = 0
-repeat task.wait(0.1) timeout += task.wait(0.1) until timeout >= 1 or v.Parent
-if v.Parent then
 if v.Parent:FindFirstChildOfClass("Humanoid") then return end
 if  HidingPlaces[v.Name] then
 table.insert(Closets, v)
@@ -5447,7 +5473,12 @@ end
 
 
 end
-
+if Toggles.AntiLag.Value then
+if v:IsA("BasePart") then
+v:SetAttribute("Mat", v.Material)
+v.Material = "Plastic"
+end
+end
 
 if Toggles.InfItems.Value then
 
@@ -5461,13 +5492,6 @@ end
 
 end
 
-if Toggles.ShowPath.Value then
-if v.Name == "SeekGuidingLight" then
-ShowSeekPath(v)
-end
-
-
-end
 
 if Toggles.DeleteSeekFE.Value then
     if v.Name == "TriggerEventCollision" then
@@ -5769,7 +5793,7 @@ end
 end
 
 
-end
+end)
 end))
 
 
@@ -6078,6 +6102,15 @@ if Prompt:GetAttribute("InfItems") then
         end
 
 end
+end
+end
+end
+
+
+for _, v in workspace.CurrentRooms:GetDescendants() do
+if v:IsA("BasePart") then
+if v:GetAttribute("Mat") then
+v.Material = v:GetAttribute("Mat") or "Plastic"
 end
 end
 end
