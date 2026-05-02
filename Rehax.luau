@@ -855,8 +855,8 @@ if ReplicatedStorage:FindFirstChild("EntityInfo") or ReplicatedStorage:FindFirst
  
 repeat task.wait() until LocalPlayer.Character 
 
-if  getgenv().ScriptLibrary ~= "Obsidian" or getgenv().ScriptLibrary ~= "Linoria" then
-getgenv().ScriptLibrary = getgenv().ScriptLibrary or "Obsidian"
+if   getgenv().ScriptLibrary ~= "Linoria" then
+getgenv().ScriptLibrary = getgenv().ScriptLibrary or "Linoria"
 end
 
 local repo = getgenv().ScriptLibrary == "Obsidian" and 'https://raw.githubusercontent.com/mstudio45/Obsidian/main/' or getgenv().ScriptLibrary == "Linoria" and 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
@@ -894,7 +894,7 @@ local Window = Library:CreateWindow({
 NotifySide = "Right",
 	ShowCustomCursor = true,
     })
-local Notifying = "Supreme"
+local Notifying = "Library"
 local PlaySound = true
 local function Notify(txt,duration)
 if Notifying == "Library" then
@@ -1028,7 +1028,7 @@ local Tabs = {
 }
 
 local Tp = Tabs.Main:AddLeftGroupbox("Teleport")
-
+Tp:AddLabel('NO PROGRESS', true)
 Tp:AddButton("Teleport Hotel", function()
 
 
@@ -1183,7 +1183,7 @@ end)
 
 MenuGroup:AddDropdown("Library", {
 	Values = { "Obsidian", "Linoria" },
-	Default = getgenv().ScriptLibrary,
+	Default = 2,
 
 	Text = "Library",
 
@@ -1459,7 +1459,7 @@ function PathTo(Pos)
 			AgentRadius = 2,
 			AgentHeight = 5,
 			AgentCanJump = true,
-			WaypointSpacing = 3,
+			WaypointSpacing = 2,
 			AgentCanSprint = false,
 			AgentMaxSlope = 45,
 			AgentJumpHeight = 0
@@ -1484,7 +1484,7 @@ if not Toggles.AutoRooms.Value or Library.Unloaded then break end
 
  
 			local Dist = (Root.Position - waypoint.Position).Magnitude
-if Dist >= 3 then
+if Dist >= 2 then
 				Humanoid:MoveTo(waypoint.Position)
 
 
@@ -5350,7 +5350,7 @@ end))
 
 
 
-table.insert(Connections, RunService.Heartbeat:Connect(function()
+table.insert(Connections, RunService.RenderStepped:Connect(function()
 
 if Toggles.AutoRooms.Value then
         if IsMoving then return end
