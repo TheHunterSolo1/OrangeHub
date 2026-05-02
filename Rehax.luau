@@ -856,7 +856,7 @@ if ReplicatedStorage:FindFirstChild("EntityInfo") or ReplicatedStorage:FindFirst
 repeat task.wait() until LocalPlayer.Character 
 
 if  getgenv().ScriptLibrary ~= "Obsidian" or getgenv().ScriptLibrary ~= "Linoria" then
-getgenv().ScriptLibrary = getgenv().ScriptLibrary or "Linoria"
+getgenv().ScriptLibrary = getgenv().ScriptLibrary or "Obsidian"
 end
 
 local repo = getgenv().ScriptLibrary == "Obsidian" and 'https://raw.githubusercontent.com/mstudio45/Obsidian/main/' or getgenv().ScriptLibrary == "Linoria" and 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
@@ -1459,7 +1459,7 @@ function PathTo(Pos)
 			AgentRadius = 2,
 			AgentHeight = 5,
 			AgentCanJump = true,
-			WaypointSpacing = 4,
+			WaypointSpacing = 3,
 			AgentCanSprint = false,
 			AgentMaxSlope = 45,
 			AgentJumpHeight = 0
@@ -1484,7 +1484,7 @@ if not Toggles.AutoRooms.Value or Library.Unloaded then break end
 
  
 			local Dist = (Root.Position - waypoint.Position).Magnitude
-if Dist >= 4 then
+if Dist >= 3 then
 				Humanoid:MoveTo(waypoint.Position)
 
 
@@ -4944,16 +4944,16 @@ if Toggles.Godmode.Value then
             LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(0, -2.3, 0)
         end
 
-        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.15 then
-            LocalPlayer.Character.Humanoid.HipHeight = 0.15
+        if LocalPlayer.Character.Humanoid.HipHeight ~= 0.22 then
+            LocalPlayer.Character.Humanoid.HipHeight = 0.22
         end
 
-        if LocalPlayer.Character.Collision.Size ~= Vector3.new(1, 1, 1) then
-            LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 1) 
+        if LocalPlayer.Character.Collision.Size ~= Vector3.new(1, 1, 4) then
+            LocalPlayer.Character.Collision.Size = Vector3.new(1, 1, 4)
         end
 
-        if LocalPlayer.Character.Collision.CollisionCrouch.Size ~= Vector3.new(1, 1, 1) then
-            LocalPlayer.Character.Collision.CollisionCrouch.Size = Vector3.new(1, 1, 1)
+        if LocalPlayer.Character.Collision.CollisionCrouch.Size ~= Vector3.new(1, 1, 4) then
+            LocalPlayer.Character.Collision.CollisionCrouch.Size = Vector3.new(1, 1, 4) 
         end
     end
 
