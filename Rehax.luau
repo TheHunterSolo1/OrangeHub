@@ -2,7 +2,7 @@
 --!native
 --!optimize 2
 
- local Players = game:GetService("Players")
+local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
@@ -27,6 +27,24 @@ return end
 game:GetService("Players").LocalPlayer:SetAttribute("SupremeLoaded",true)
 
 local LibraryName = 'Supreme Hub'
+
+
+local executionCount = 0
+
+if isfile and writefile and readfile then
+    local filename = "ExecutionCount.txt"
+    
+
+    if isfile(filename) then
+        executionCount = tonumber(readfile(filename)) or 0
+        executionCount = executionCount + 1
+        writefile(filename, tostring(executionCount))
+    else
+        executionCount = 1
+        writefile(filename, "1")
+    end
+end
+
 
 if game.PlaceId == 126509999114328 then 
 
@@ -90,11 +108,25 @@ task.wait(2)
 
 
     local Tabs = {
-        Main = Window:AddTab('Home', "house"),
+        Home = Window:AddTab('Home', 'house'),
+        Main = Window:AddTab('Player', "star"),
         Visuals = Window:AddTab('Visuals',"eye"),
         Settings = Window:AddTab('Settings',"settings"),
     } 
 
+
+
+local HomeBox = Tabs.Home:AddLeftGroupbox('Home')
+
+local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
+
+HomeBox:AddImage("PlayerFace", {
+    Image = content,
+    Height = 200,
+})
+
+HomeBox:AddDivider()
+HomeBox:AddLabel('Execution Times ' .. (tonumber(executionCount) and tonumber(executionCount) >= 1 and executionCount or "Nan"))
 local OPBox = Tabs.Main:AddRightGroupbox('Overpowered')
 OPBox:AddLabel('Warning Abusing This Feature Can Cause Server Wide Crash or alot of lag',true)
 OPBox:AddToggle('InfSapling',{
@@ -883,6 +915,7 @@ local NotificationHandler = NotificationLibrary:New({
 
 
 
+
 local Options = Library.Options
 local Toggles = Library.Toggles
 local Connections = {}
@@ -1023,9 +1056,24 @@ if workspace:FindFirstChild("Lobby") then
 
 
 local Tabs = {
-        Main = Window:AddTab('Home', "house"),
+        Home = Window:AddTab('Home', 'house'),
+        Main = Window:AddTab('Game', "star"),
         Settings = Window:AddTab('Settings',"settings"),
 }
+
+
+local HomeBox = Tabs.Home:AddLeftGroupbox('Home')
+
+local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
+
+HomeBox:AddImage("PlayerFace", {
+    Image = content,
+    Height = 200,
+})
+
+HomeBox:AddDivider()
+HomeBox:AddLabel('Execution Times ' .. (tonumber(executionCount) and tonumber(executionCount) >= 1 and executionCount or "Nan"))
+
 
 local Tp = Tabs.Main:AddLeftGroupbox("Teleport")
 Tp:AddLabel('NO PROGRESS', true)
@@ -1220,205 +1268,10 @@ UtilityBox:AddLabel('FireBacon - ESPLibrary Creator',true)
             LocalPlayer:SetAttribute("SupremeLoaded", nil)
             for _, con in pairs(Connections) do con:Disconnect() end
 
-local Dread = LocalPlayer:FindFirstChild("Dread",true) or LocalPlayer:FindFirstChild("_Dread",true)
-
-if Dread then
-Dread.Name = "Dread"
-end
-
-local Dread = ClientModules.EntityModules:FindFirstChild("Shade",true) or ClientModules.EntityModules:FindFirstChild("_Shade",true)
-
-if Dread then
-Dread.Name = "Shade"
-end
-
-FakeA90:Destroy()
-FakeScreech:Destroy()
-
-
-if ReplicatedStorage:FindFirstChild("Screech") then 
-ReplicatedStorage:FindFirstChild("Screech").Parent = RemotesFolder
-end
-
-
-
-local fcPart = workspace:FindFirstChild("FreecamPart")
-    
-    if fcPart then
-        
-        
-        
-        fcPart:Destroy()
-        
-        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root then root.Anchored = false end
-        
-        LocalPlayer.CameraMinZoomDistance = LocalPlayer:GetAttribute("fc_om") or 0.5
-        LocalPlayer.CameraMaxZoomDistance = LocalPlayer:GetAttribute("fc_ox") or 128
-    end
-
-
-
-
-if ReplicatedStorage:FindFirstChild("A90") then 
-ReplicatedStorage:FindFirstChild("A90").Parent = RemotesFolder
-end
-
-
-for _, v in pairs(workspace:GetDescendants()) do
-
-if v:IsA("BasePart") then
-v.CanTouch = true
-end
-if v.Name == "BridgeBarrier" then
-v:Destroy()
-end
-
-end
-
-if LocalPlayer.Character then
-            LocalPlayer.Character.Humanoid.WalkSpeed = 16
-LocalPlayer.Character:SetAttribute("CanJump",false)
-for _, v in pairs(LocalPlayer.Character:GetChildren()) do
-if not (v.Name == "CollisionClone") and v:IsA("BasePart") then
-
-v.CanCollide  = true
-end
-end
-
-
-if OldAccel then
-LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = OldAccel 
-OldAccel = nil
-end
-
-LocalPlayer.Character:SetAttribute("Sliding",false)
-
-end
-for _, v in ipairs(workspace:GetDescendants()) do
-if v:IsA("ProximityPrompt") then
-
-v.HoldDuration = v:GetAttribute("Duration") or 
-v.HoldDuration 
-end
-end
-if OldFogEnd then
-Lighting.FogEnd = OldFogEnd
-OldFogEnd = nil
-end
-for _, v in pairs(Lighting:GetChildren()) do
-    if v:IsA("Atmosphere") then
-        v.Density = 0.94
-    end
-end
-
-
-
-
-
-Lighting.Ambient = Color3.fromRGB(0, 0, 0)
-Lighting.GlobalShadows = true
-for _, v in pairs(workspace.CurrentRooms:GetChildren()) do
-v:SetAttribute("Ambient", Color3.fromRGB(0, 0, 0))
-end
-FakeScreech:Destroy()
-FakeA90:Destroy()
-
-task.wait()
-if RemotesFolder:FindFirstChild("A90_") then
-RemotesFolder:FindFirstChild("A90_").Name = "A90"
-
-end
-if RemotesFolder:FindFirstChild("Screech_") then
-local Cutscene = RemoteListener:FindFirstChild("Cutscenes") or RemoteListener:FindFirstChild("Cutscenes_")
-Cutscene.Name = "Cutscenes"
-
-
-
-RemotesFolder:FindFirstChild("Screech_").Name = "Screech"
-
-end
-
-
-
-for _, v in pairs(workspace:GetDescendants()) do
-if v:IsA("ProximityPrompt") then
-v.MaxActivationDistance = v:GetAttribute("Range") or v.MaxActivationDistance 
-end
-if v.Name == "SeekFloodline" then
-v.CanCollide = false
-end
-
-end
-
-for _, Prompt in pairs(workspace.CurrentRooms:GetDescendants()) do
-if Prompt:IsA("ProximityPrompt") then
-if Prompt.Parent then
-if Names[Prompt.Parent.Name] then
-if Prompt:GetAttribute("InfItems") then
-
-            local Fake = Prompt.Parent:FindFirstChild("InfPrompt")
-            if Fake then 
-                Fake:Destroy() 
-            end
-
-            Prompt:SetAttribute("InfItems", nil)
-            Prompt.Enabled = true
-            Prompt.ClickablePrompt = true
-        end
-
-end
-end
-end
-end
-
-if CollisionClone then
-CollisionClone:Destroy()
-CollisionClone = nil
-end
-
-if PathFolder then
-PathFolder:Destroy()
-
-end
-if LocalPlayer.Character then
-LocalPlayer.Character.Humanoid:MoveTo(LocalPlayer.Character.HumanoidRootPart.Position)
-LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(Vector3.new(0, 0, 0))
-end
-
-if RemotesFolder:FindFirstChild("Crouch") then
-RemotesFolder.Crouch:FireServer(false)
-end
-if LocalPlayer.Character then
-LocalPlayer.Character.Collision.Position = LocalPlayer.Character.HumanoidRootPart.Position
-LocalPlayer.Character.Humanoid.HipHeight =2.4
-if RemotesFolder.Name ~= "RemotesFolder" then
-LocalPlayer.Character.Collision.Position = LocalPlayer.Character.HumanoidRootPart.Position
-end
-end
-if GodmodeFolder then Folder:Destroy()
-end
-if LocalPlayer.Character then
-for _, v in pairs(LocalPlayer.Character:GetChildren()) do
-if v.Name ~= "CollisionClone"  and v.Name ~= "Collision" and v.Name ~= "HumanoidRootPart" and v.Name ~= "CollisionPart" then
-if v:IsA("BasePart") then
-v.Transparency = 0
-end
-end
-end
-end
-
-if  ReplicatedStorage:FindFirstChild("LiveModifiers") and ReplicatedStorage:FindFirstChild("LiveModifiers"):FindFirstChild("Jammin") then
-
-local Jam = LocalPlayer.PlayerGui.MainUI.Initiator:FindFirstChild("Main_Game").Health.Jam
-Jam.Playing = true 
-local Jamming = game:GetService("SoundService").Main.Jamming
-Jamming.Enabled =  true
-end
 
             Library:Unload()
 ESPLibrary:Unload()
-ShouldStop = true
+
 end
 })
 
@@ -1437,6 +1290,13 @@ ThemeManager:SetLibrary(Library)
 else
 
 
+local function GetDistanceToPlayer(Pos)
+local DisA = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Position or workspace.CurrentCamera and workspace.CurrentCamera.CFrame.Position or Vector3.new(0, 0, 0)
+
+local Dis = (DisA - Pos).Magnitude
+return Dis
+
+end
 
 local PathFolder = Instance.new("Folder",workspace)
 PathFolder.Name = "PathFolder" 
@@ -1620,7 +1480,7 @@ SeekPath.Name = "SeekPath"
 
 function ShowSeekPath(v)
 local Part = Instance.new("Part", SeekPath)
-Part.Size = Vector3.new(1, 1, 1)
+Part.Size = Vector3.new(1.5, 1.5, 1.5)
 Part.Anchored = true
 Part.Shape = "Ball"
 Part.Position = v.Position 
@@ -1634,7 +1494,7 @@ end
 
 
 function FixBridge(v)
-    if workspace:FindFirstChild("SeekMovingNewClone") then
+    
         for _, i in pairs(v:GetChildren()) do
             if i.Name == "PlayerBarrier" and i.Rotation.X == 180 then
                 local Barrier = i:Clone()
@@ -1643,7 +1503,7 @@ function FixBridge(v)
                 Barrier.CFrame = Barrier.CFrame * CFrame.new(0, -7, 0)
                 
                 Barrier.Size = Vector3.new(40, 0.1, 40)
-                Barrier.Transparency = 0
+                Barrier.Transparency = 0.5
                 Barrier.Color = Color3.new(0.5, 0, 0.5)
                 Barrier.Material = "ForceField"
                 Barrier.Parent = v
@@ -1653,8 +1513,6 @@ function FixBridge(v)
             end
         end
     end
-end
-
 
 
 
@@ -1745,7 +1603,8 @@ end))
 
 
 local Tabs = {
-        Main = Window:AddTab('Home', "house"),
+        Home = Window:AddTab('Home', 'house'),
+        Main = Window:AddTab('Player', "star"),
        Bypass = Window:AddTab('Bypass', "ban"),
         Visuals = Window:AddTab('Visuals',"eye"),
     Floor = Window:AddTab('Floor', "sparkles"),
@@ -1759,13 +1618,23 @@ local MinesFloor = Tabs.Floor:AddRightGroupbox('Mines')
 local FoolsFloor = Tabs.Floor:AddRightGroupbox('Fools')
 local RoomsFloor = Tabs.Floor:AddLeftGroupbox('Rooms')
 local RetroFloor = Tabs.Floor:AddLeftGroupbox('Retro')
+local EndlessFloor = Tabs.Floor:AddRightGroupbox('Endless')
 
 
 
 
 
+local HomeBox = Tabs.Home:AddLeftGroupbox('Home')
 
+local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)
 
+HomeBox:AddImage("PlayerFace", {
+    Image = content,
+    Height = 200,
+})
+
+HomeBox:AddDivider()
+HomeBox:AddLabel('Execution Times ' .. (tonumber(executionCount) and tonumber(executionCount) >= 1 and executionCount or "Nan"))
 
 
 
@@ -1829,14 +1698,15 @@ Text = "Anti Jeff",
 Default = false,
 Disabled = Floor.Value ~= "Fools" and true or false,
 Callback = function(Value)
-for _, v in pairs(workspace:GetChildren()) do
+local v = workspace:FindFirstChild("JeffTheKiller")
 if v.Name == "JeffTheKiller" then
+repeat task.wait() until v.PrimaryPart and isnetworkowner(v.PrimaryPart)
 for _, i in pairs(v:GetChildren()) do
 if i:IsA("BasePart") then
-i.CanTouch = not Value
+i.CanTouch = Value and false or true
 end
 end
-end
+v.Humanoid.Health = Value and 0 or 100
 end
 end
 })
@@ -2003,14 +1873,6 @@ if v.Name == "FigureRig" or v.Name == "FigureRagdoll" then
 table.insert(Figures,v)
 end
 end
-if Value then
-if RemotesFolder.Name == "Bricks" or Floor.Value  == "EntityInfo" then
-if LatestRoom.Value == 49 then
-Notify("[Delete Figure] Wait in Room 49 until Notifcation end",10)
-end
-end
-end
-
 
 end
 })
@@ -2188,10 +2050,38 @@ Disabled = Floor.Value ~= "Rooms" and true or false,
 })
 
 
+local Pathfinder = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/main/CustomPathfinding"))()
+
+EndlessFloor:AddToggle('AutoEndless',{
+Text = "Auto Walk Endless",
+Disabled = Floor.Value ~= "Endless" and true or false,
+Callback = function(Value)
+if not Value then
+
+ Pathfinder:StopPath()
+end
+end
+
+})
 
 
 
 
+table.insert(Connections, RunService.Heartbeat:Connect(function()
+if LocalPlayer:GetAttribute("Alive") then
+if Toggles.AutoEndless.Value then
+local Door = workspace.CurrentRooms[LatestRoom.Value].Door.Door
+local Key = workspace.CurrentRooms[LatestRoom.Value]:FindFirstChild("KeyObtain",true)
+local OwnKey = LocalPlayer.Character:FindFirstChild("Key") or LocalPlayer.Backpack:FindFirstChild("Key")
+if Key and not OwnKey then
+Pathfinder:WalkPath(Key.PrimaryPart)
+elseif not Key or OwnKey then
+Pathfinder:WalkPath(Door)
+end
+end
+
+end
+end))
 ESPSettings:AddToggle('ShowDistance',{
 Text = "Show ESP Distance",
 Default = true,
@@ -2376,9 +2266,7 @@ if LocalPlayer.Character.HumanoidRootPart:FindFirstChild("FlightVelocity") then
 LocalPlayer.Character.HumanoidRootPart:FindFirstChild("FlightVelocity"):Destroy()
 end
 
-if LocalPlayer.Character.HumanoidRootPart:FindFirstChild("FlightGyro") then
-LocalPlayer.Character.HumanoidRootPart:FindFirstChild("FlightGyro"):Destroy()
-end
+
 
 end
 end
@@ -2658,7 +2546,7 @@ local MaxDistance = math.huge
 if #Closets > 0 then
 for _, v in pairs(Closets) do
 if v:FindFirstChild("HiddenPlayer") and v.HiddenPlayer.Value == nil then
-local Dis = (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude
+local Dis = GetDistanceToPlayer(v.PrimaryPart.Position)
 if Dis < MaxDistance then
 Closest = v
 MaxDistance = Dis
@@ -2870,7 +2758,7 @@ if not Value then
 Lighting.Ambient = Color3.fromRGB(0, 0, 0)
 Lighting.GlobalShadows = true
 for _, v in pairs(workspace.CurrentRooms:GetChildren()) do
-v:SetAttribute("Ambient", Color3.fromRGB(0, 0, 0))
+v:SetAttribute("Ambient", v:GetAttribute("OldAmbient"))
 end
 end
 
@@ -3682,9 +3570,36 @@ BypassBox:AddDivider()
 
 
 
+
+BypassBox:AddDropdown("AntiCheatManiMethod", {
+	Values = { "Velocity", "Anticheat" },
+	Default = 1,
+
+	Text = "Manipulation Method",
+
+	Callback = function(Value)
+
+	end,
+})
+
+
+
 BypassBox:AddToggle('AntiCheatMani',{
-Text = "Anticheat Manipulation",
-Default = false
+Text = "Manipulation",
+Default = false,
+Callback = function(Value)
+if not Value then
+
+if LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityMani") then
+LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityMani"):Destroy()
+end
+
+if  Toggles.NoClip.Value then
+Toggles.NoClip:SetValue(false)
+end
+
+end
+end
 }):AddKeyPicker("AntiCheatMan", {
 	-- SyncToggleState only works with toggles.
 	-- It allows you to make a keybind which has its state synced with its parent toggle
@@ -3698,7 +3613,7 @@ Default = false
 	-- You can define custom Modes but I have never had a use for it.
 	Mode = Library.IsMobile and "Toggle" or "Hold",  -- Modes: Always, Toggle, Hold, Press (example down below)
 
-	Text = "Anticheat Manipulation", -- Text to display in the keybind menu
+	Text = " Manipulation", -- Text to display in the keybind menu
 	NoUI = false, -- Set to true if you want to hide from the Keybind menu,
 
 	-- Occurs when the keybind is clicked, Value is `true`/`false`
@@ -3715,6 +3630,7 @@ BypassBox:AddLabel("Fake Revive When Toggled On there is no back so Toggle it ba
 BypassBox:AddToggle('FakeRevive',{
 Text = "Fake Revive",
 Default = false,
+Disabled = Floor.Value == "Fools" and true or RemotesFolder.Name =="Bricks" and true or false,
 Risky = true,
 })
 
@@ -3794,12 +3710,13 @@ end
 end
 if Toggles.AntiJeff.Value then
 if v.Name == "JeffTheKiller" then
-repeat task.wait() until v:FindFirstChild("Humanoid") 
+repeat task.wait() until v.PrimaryPart and isnetworkowner(v.PrimaryPart)
 for _, i in pairs(v:GetChildren()) do
 if i:IsA("BasePart") then
 i.CanTouch = false
 end
 end
+v.Humanoid.Health = 0
 end
 end
 
@@ -3966,14 +3883,7 @@ ESPLibrary:RemoveESP(OldDoor:FindFirstChild("CrossBoards"))
 end
 end
 
-local OldDoor = workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1].Door.Door
-if OldDoor then
-ESPLibrary:RemoveESP(OldDoor)
-if OldDoor:FindFirstChild("CrossBoards") then
-ESPLibrary:RemoveESP(OldDoor:FindFirstChild("CrossBoards"))
-end
 
-end
 
 local Doo = workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1].Door.Door
 if Doo:FindFirstChild("CrossBoards") then
@@ -4358,7 +4268,7 @@ local function InfPrompt(Prompt)
                             local ClosestDist = 15
                             for _, v in ipairs(workspace.Drops:GetChildren()) do
                                 if v.Name == Name then
-                                    local Dist = (v:GetPivot().Position - RootPart.Position).Magnitude
+                                    local Dist = GetDistanceToPlayer(v:GetPivot().Position)
                                     if Dist < ClosestDist then
                                         ClosestDist = Dist
                                         Drop = v
@@ -4540,7 +4450,14 @@ end
 
 end
 
+ 
+
 if not LocalPlayer:GetAttribute("Alive") then 
+if Toggles.InfRevive.Value then
+
+RemotesFolder.Revive:FireServer()
+end
+
 if CollisionClone then
 CollisionClone = nil
 end
@@ -4549,9 +4466,9 @@ end
 
 
 
-
+if Camera ~= workspace.CurrentCamera then
 Camera = workspace.CurrentCamera
-
+end
 
 if not LocalPlayer.Character:GetAttribute("Climbing") and Toggles.EnableMovementSpeed.Value then
     if LocalPlayer.Character.Humanoid.WalkSpeed ~= Options.MovementSpeed.Value then
@@ -4674,10 +4591,10 @@ Notify("Sorry your executor wont support Delete Figure Because isnetworkowner", 
 Toggles.DeleteFigureFE:SetValue(false)
 end 
         if Root and isnetworkowner(Root) then
-if RemotesFolder.Name == "RemotesFolder" then
-            v.Root.Size = Vector3.new(10, 2040, 10)
+if Root:FindFirstChild("BodyForce") then
+Root.BodyForce.Force = Vector3.new(0, -50000, 0)
 else
-v.Root.CFrame = CFrame.new(0, -50000, 0)
+Root:PivotTo(CFrame.new(0, -50000, 0))
 end
 
             for _, part in pairs(v:GetDescendants()) do
@@ -4766,7 +4683,7 @@ if Toggles.AutoMinecart.Value and Camera:FindFirstChild("MinecartRig") then
         local ClosestDuckDist = math.huge
         
         for _, v in pairs(DuckBoards) do
-            local Dist = (Root.Position - v:GetPivot().Position).Magnitude
+            local Dist = GetDistanceToPlayer(v:GetPivot().Position)
             if Dist < ClosestDuckDist then
                 ClosestDuckDist = Dist
             end
@@ -4799,7 +4716,7 @@ end
                 end
 
                 if Node1 then
-                    local DistToNode = (Root.Position - CurrentNode.Position).Magnitude
+                    local DistToNode = GetDistanceToPlayer(CurrentNode.Position)
                     
                     if DistToNode > 30 then
 require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
@@ -4808,12 +4725,12 @@ end
 
 else
                         local DirectionToNode = (CurrentNode.Position - Node1.Position).Unit
-                        local Dot = DirectionToNode:Dot(Root.CFrame.RightVector)
+                        local Dot = DirectionToNode:Dot(CurrentNode.CFrame.RightVector)
 
                         require(LocalPlayer.PlayerScripts.PlayerModule):GetControls().GetMoveVector = function()
-                            if Dot > 0.1 then
+                            if Dot > 0.15 then
                                 return Vector3.new(1, 0, 0)
-                            elseif Dot < -0.1  then
+                            elseif Dot < -0.15 then
                                 return Vector3.new(1, 0, 0)
                             end
                             return Vector3.new(0, 0, -1)
@@ -4915,7 +4832,7 @@ if Toggles.AutoHiding.Value then
                 if not MainPart  then
                     LocalPlayer.Character:SetAttribute("Hiding", false)
                 else
-                    local Dis = (LocalPlayer.Character.HumanoidRootPart.Position - MainPart.Position).Magnitude
+                    local Dis = GetDistanceToPlayer(MainPart.Position)
 
                     if Dis < Monster then
                         if not LocalPlayer.Character.PrimaryPart.Anchored then
@@ -5041,7 +4958,7 @@ if Toggles.AutoLibraryCode.Value then
                 local Bruted = ""
                 for i = 1, #Code do
                     local char = string.sub(Code, i, i)
-                    Bruted ..= (char == "x" and math.random(0, 9) or char)
+                    Bruted ..= (char == "_" and math.random(0, 9) or char)
                 end
                 Code = Bruted
             end
@@ -5052,10 +4969,10 @@ end
 
 
 
-if Toggles.DoorReach.Value and DoorReach > 0.1 then
+if Toggles.DoorReach.Value and DoorReach > 0.2 then
 DoorReach = 0
 local Door = workspace.CurrentRooms[LatestRoom.Value].Door
-if Door.Parent and Door.Parent.Name ~= "101" then
+if Door.Parent and Door.Parent.Name ~= "101" and GetDistanceToPlayer(Door.Door.Position) < 30 then
 
 Door.ClientOpen:FireServer()
 end
@@ -5182,11 +5099,6 @@ PlayerESP = 0
 
 
 
-if Toggles.InfRevive.Value then
-if not LocalPlayer:GetAttribute("Alive") then
-RemotesFolder.Revive:FireServer()
-end
-end
 
 if Toggles.LadderBypass.Value then
 if LocalPlayer.Character:GetAttribute("Climbing") then
@@ -5223,11 +5135,21 @@ if Toggles.FullBright.Value then
         Lighting.Ambient = Color3.new(1, 1, 1)
     end
 
+if not workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")]:GetAttribute("OldAmbient") then
+workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")]:SetAttribute("OldAmbient", workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")]:GetAttribute("Ambient"))
+end
+
     if workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")]:GetAttribute("Ambient") ~= Color3.new(1, 1, 1) then
         workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")]:SetAttribute("Ambient", Color3.new(1, 1, 1))
+
+
     end
 
     if LatestRoom.Value < 100 then
+if not workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1]:GetAttribute("OldAmbient") then
+workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1]:SetAttribute("OldAmbient", workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1]:GetAttribute("Ambient"))
+end
+
         if workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1]:GetAttribute("Ambient") ~= Color3.new(1, 1, 1) then
             workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom") + 1]:SetAttribute("Ambient", Color3.new(1, 1, 1))
         end
@@ -5236,9 +5158,25 @@ end
 
 
 if Toggles.AntiCheatMani.Value and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+
+if Options.AntiCheatManiMethod.Value == "Velocity" then
+if not Toggles.NoClip.Value then
+Toggles.NoClip:SetValue(true)
+end
+
+local BodyVelocity = LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityMani") or Instance.new("BodyVelocity", LocalPlayer.Character.HumanoidRootPart)
+local LookingVector = LocalPlayer.Character.HumanoidRootPart.CFrame.LookVector * 2
+BodyVelocity.Velocity = Vector3.new(LookingVector.X, LookingVector.Y, LookingVector.Z)
+BodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+BodyVelocity.Name = "VelocityMani"
+else
+
+
     local currentPivot = LocalPlayer.Character:GetPivot()
     LocalPlayer.Character:PivotTo(currentPivot  * CFrame.new(0, 0, 10000))
 
+end
 end
 
 
@@ -5318,15 +5256,15 @@ end
 
 if not Toggles.NoClip.Value then
 for _, v in pairs(LocalPlayer.Character:GetChildren()) do
-if not (v.Name == "CollisionClone" or v.Name == "Collision") then
-if v:IsA("BasePart") and not v.CanCollide then
-v.CanCollide  = true
-end
-end
+    if v.Name ~= "CollisionClone" and v.Name ~= "Collision" then
+        if v:IsA("BasePart") and not v.CanCollide then
+            v.CanCollide = true
+        end
+    end
 end
 
     if LocalPlayer.Character:FindFirstChild("Collision") then
-        LocalPlayer.Character.Collision.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup ~= "PlayerCrouching")
+        LocalPlayer.Character.Collision.CanCollide = (LocalPlayer.Character.Collision.CollisionGroup == "PlayerCrouching" and false or LocalPlayer.Character.Collision.CollisionGroup ~= "PlayerCrouching" and true)
 
             if LocalPlayer.Character.Collision:FindFirstChild("CollisionCrouch") then
                 LocalPlayer.Character.Collision.CollisionCrouch.CanCollide = LocalPlayer.Character.Collision.CanCollide
@@ -5449,10 +5387,12 @@ end
 
 table.insert(Connections,workspace.DescendantAdded:Connect(function(v)
 
-
-task.defer(function()
+local timeout = 0
+repeat task.wait(0.03) timeout += 0.03 until v.Parent or timeout > 0.5
+if v.Parent then
 
 if v.Parent:FindFirstChildOfClass("Humanoid") then return end
+if (v.Name == "Candle" and v.Parent.Name == "Candle" or v.Parent.Parent and v.Parent.Parent.Name == "Candle") then return end
 if  HidingPlaces[v.Name] then
 table.insert(Closets, v)
 end
@@ -5496,12 +5436,17 @@ end
 if Toggles.DeleteSeekFE.Value then
     if v.Name == "TriggerEventCollision" then
         Notify("Deleting Seek", 3)
-        
+        local Part = v:FindFirstChild("Collision") or v.ChildAdded:Wait()
+if Part then
+Notify("DONT OPEN NEXT DOOR", 1)
+task.wait(0.1)
         for _, Item in pairs(v:GetChildren()) do
             if Item.Name == "Collision" then
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
 if FireTouch then
                     firetouchinterest(LocalPlayer.Character.HumanoidRootPart, Item, 0)
+task.wait()
+firetouchinterest(LocalPlayer.Character.HumanoidRootPart, Item, 1)
 end
                                   end
             end
@@ -5518,13 +5463,13 @@ end
         end
 
         if Success then
-            Notify("Deleted Seek Successfully", 3)
+            Notify("Deleted Seek Successfully Open Next Door", 3)
         else
-            Notify("Failed To Delete Seek", 3)
+            Notify("Failed To Delete Seek Open Next Door", 3)
         end
     end
 end
-
+end
 
 
 
@@ -5793,7 +5738,7 @@ end
 end
 
 
-end)
+end
 end))
 
 
@@ -6047,13 +5992,16 @@ for _, v in pairs(Lighting:GetChildren()) do
 end
 
 
+if LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityMani") then
+LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityMani"):Destroy()
+end
 
 
 
 Lighting.Ambient = Color3.fromRGB(0, 0, 0)
 Lighting.GlobalShadows = true
 for _, v in pairs(workspace.CurrentRooms:GetChildren()) do
-v:SetAttribute("Ambient", Color3.fromRGB(0, 0, 0))
+v:SetAttribute("Ambient", v:GetAttribute("OldAmbient") and v:GetAttribute("OldAmbient") or Color3.new(0, 0, 0))
 end
 FakeScreech:Destroy()
 FakeA90:Destroy()
@@ -6136,6 +6084,10 @@ end
 if LocalPlayer.Character then
 LocalPlayer.Character.Humanoid:MoveTo(LocalPlayer.Character.HumanoidRootPart.Position)
 LocalPlayer.Character.LowerTorso.Root.C1 = CFrame.new(Vector3.new(0, 0, 0))
+end
+
+if LocalPlayer.Character.HumanoidRootPart:FindFirstChild("FlightVelocity") then
+LocalPlayer.Character.HumanoidRootPart:FindFirstChild("FlightVelocity"):Destroy()
 end
 
 if RemotesFolder:FindFirstChild("Crouch") then
