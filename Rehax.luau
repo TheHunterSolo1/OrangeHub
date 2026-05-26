@@ -1618,7 +1618,6 @@ local MinesFloor = Tabs.Floor:AddRightGroupbox('Mines')
 local FoolsFloor = Tabs.Floor:AddRightGroupbox('Fools')
 local RoomsFloor = Tabs.Floor:AddLeftGroupbox('Rooms')
 local RetroFloor = Tabs.Floor:AddLeftGroupbox('Retro')
-local EndlessFloor = Tabs.Floor:AddRightGroupbox('Endless')
 
 
 
@@ -2050,38 +2049,11 @@ Disabled = Floor.Value ~= "Rooms" and true or false,
 })
 
 
-local Pathfinder = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/main/CustomPathfinding"))()
-
-EndlessFloor:AddToggle('AutoEndless',{
-Text = "Auto Walk Endless",
-Disabled = Floor.Value ~= "Endless" and true or false,
-Callback = function(Value)
-if not Value then
-
- Pathfinder:StopPath()
-end
-end
-
-})
 
 
 
 
-table.insert(Connections, RunService.Heartbeat:Connect(function()
-if LocalPlayer:GetAttribute("Alive") then
-if Toggles.AutoEndless.Value then
-local Door = workspace.CurrentRooms[LatestRoom.Value].Door.Door
-local Key = workspace.CurrentRooms[LatestRoom.Value]:FindFirstChild("KeyObtain",true)
-local OwnKey = LocalPlayer.Character:FindFirstChild("Key") or LocalPlayer.Backpack:FindFirstChild("Key")
-if Key and not OwnKey then
-Pathfinder:WalkPath(Key.PrimaryPart)
-elseif not Key or OwnKey then
-Pathfinder:WalkPath(Door)
-end
-end
 
-end
-end))
 ESPSettings:AddToggle('ShowDistance',{
 Text = "Show ESP Distance",
 Default = true,
