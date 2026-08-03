@@ -900,15 +900,7 @@ local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))
     local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
     local ESPLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/TheHunterSolo1/Scripts/main/ESPLibrary"))() -- Loading the library
 
-local NotificationLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/projects/refs/heads/main/UI/NotificationLibrary/Source.luau"))()
-local NotificationHandler = NotificationLibrary:New({
-	BackgroundColor = Color3.fromRGB(100, 100, 100), -- background color of the notification
-	-- TitleColor = Color3.fromRGB(), -- title text color
-	-- DescriptionColor = Color3.fromRGB(), -- description text color
-	-- Mode = "Light", -- either "Dark" or "Light" | very important to set this so it looks better
-	VerticalPosition = "Top", -- either "Top" or "Bottom"
-	HorizontalPosition = "Right", -- either "Right" or "Left"
-})
+
 
 
 	
@@ -948,13 +940,7 @@ elseif Notifying == "Doors" then
         })
  
 
-elseif Notifying == "Supreme" then
-NotificationHandler:Create({
-		Title = "Supreme Hub",
-		Description = txt,
-		Duration = duration,
-		Image = "",
-	})
+
 
 
 
@@ -5791,7 +5777,7 @@ MenuGroup:AddDropdown("NotificationSide", {
 })
 
 MenuGroup:AddDropdown("NotifyWay", {
-	Values = { "Doors", "Library", "Supreme"},
+	Values = { "Doors", "Library"},
 	Default = Notifying,
 
 	Text = "Notification  Library",
